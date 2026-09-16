@@ -1,0 +1,425 @@
+<!-- Manajemen Produk -->
+<div class="animate-fade-in-up">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <h2 class="page-title">Manajemen Produk</h2>
+      <span class="page-subtitle"><%= typeof stats !== 'undefined' ? stats.total : produk.length %> SKU produk aktif terdaftar</span>
+    </div>
+    <div class="page-header-actions">
+      <% if (typeof user !== 'undefined' && user && user.role === 'Admin') { %>
+      <a href="/pengaturan?tab=hak-akses" class="btn btn-outline-primary" title="Atur izin akses user staf/kasir untuk Tabel Produk">
+        <i class="bi bi-shield-lock me-1"></i> Atur Hak Akses Kasir
+      </a>
+      <% } %>
+      <a href="/produk/barcode" class="btn btn-outline-secondary" target="_blank">
+        <i class="bi bi-upc-scan me-1"></i> Cetak Barcode
+      </a>
+      <a href="/produk/tambah" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i> Tambah Produk
+      </a>
+    </div>
+  </div>
+
+  <!-- Inventory Stat Cards -->
+  <% if (typeof stats !== 'undefined') { %>
+  <div class="row g-3 mb-4 stagger-children">
+    <div class="col-sm-6 col-xl-3">
+      <div class="stat-card h-100">
+        <div class="stat-card-icon primary">
+          <i class="bi bi-box-seam"></i>
+        </div>
+        <div class="stat-card-info">
+          <div class="stat-card-label">Total Produk</div>
+          <div class="stat-card-value"><%= stats.total %></div>
+          <div class="stat-card-sub">SKU terdaftar</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <div class="stat-card h-100">
+        <% if (typeof canSeeCost !== 'undefined' && canSeeCost) { %>
+        <div class="stat-card-icon success">
+          <i class="bi bi-cash-coin"></i>
+        </div>
+        <div class="stat-card-info">
+          <div class="stat-card-label">Nilai Persediaan</div>
+          <div class="stat-card-value" style="font-size:1.3rem;">Rp <%= (stats.nilaiStok || 0).toLocaleString('id-ID') %></div>
+          <div class="stat-card-sub">Modal persediaan fisik</div>
+        </div>
+        <% } else { %>
+        <div class="stat-card-icon success">
+          <i class="bi bi-tags"></i>
+        </div>
+        <div class="stat-card-info">
+          <div class="stat-card-label">Total Kategori</div>
+          <div class="stat-card-value"><%= kategori.length %></div>
+          <div class="stat-card-sub">Kategori produk aktif</div>
+        </div>
+        <% } %>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <div class="stat-card h-100" style="cursor:pointer;" onclick="filterStockStatus('menipis')" title="Klik untuk filter produk menipis">
+        <div class="stat-card-icon warning">
+          <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <div class="stat-card-info">
+          <div class="stat-card-label">Stok Menipis</div>
+          <div class="stat-card-value"><%= stats.stokRendah %></div>
+          <div class="stat-card-sub text-warning fw-semibold">Di bawah stok minimum</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <div class="stat-card h-100" style="cursor:pointer;" onclick="filterStockStatus('habis')" title="Klik untuk filter produk habis">
+        <div class="stat-card-icon danger">
+          <i class="bi bi-x-circle"></i>
+        </div>
+        <div class="stat-card-info">
+          <div class="stat-card-label">Stok Habis</div>
+          <div class="stat-card-value"><%= stats.stokHabis %></div>
+          <div class="stat-card-sub text-danger fw-semibold">Segera lakukan reorder</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <% } %>
+
+  <!-- Stok Alert Banner -->
+  <%- include('../../partials/stok-alert') %>
+
+  <!-- Table Container -->
+  <div class="table-wrapper">
+    <!-- Filter Header -->
+    <div class="table-header">
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 w-100">
+        <!-- Search and Select Filters -->
+        <div class="d-flex align-items-center gap-2 flex-wrap flex-grow-1">
+          <div class="table-search" style="min-width: 250px; max-width: 350px; width: 100%;">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Cari nama produk / SKU..." id="searchProduk" style="width: 100%;">
+          </div>
+          <select class="form-select form-select-sm" style="width:auto;min-width:145px;font-size:0.82rem;" id="filterKategori">
+            <option value="">Semua Kategori</option>
+            <% (typeof kategori !== 'undefined' ? kategori : []).forEach(function(k) { %>
+              <option value="<%= k.nama %>"><%= k.nama %></option>
+            <% }); %>
+          </select>
+          <select class="form-select form-select-sm" style="width:auto;min-width:130px;font-size:0.82rem;" id="filterStatus">
+            <option value="">Semua Status</option>
+            <option value="aktif">Aktif</option>
+            <option value="nonaktif">Nonaktif</option>
+          </select>
+        </div>
+
+        <!-- Quick Filter Pills -->
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <button type="button" class="filter-pill active" id="pillAll" onclick="filterStockStatus('all')">
+            Semua
+          </button>
+          <button type="button" class="filter-pill" id="pillLow" onclick="filterStockStatus('menipis')">
+            <i class="bi bi-exclamation-triangle-fill text-warning"></i> Stok Menipis
+          </button>
+          <button type="button" class="filter-pill" id="pillOut" onclick="filterStockStatus('habis')">
+            <i class="bi bi-x-circle-fill text-danger"></i> Habis
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="table-responsive">
+      <table class="data-table" id="produkTable">
+        <thead>
+          <tr>
+            <th style="min-width: 260px;">Produk</th>
+            <th class="text-nowrap" style="width: 135px;">Kategori</th>
+            <% if (typeof canSeeCost !== 'undefined' && canSeeCost) { %>
+            <th class="text-end text-nowrap" style="width: 125px;">Harga Beli</th>
+            <% } %>
+            <th class="text-end text-nowrap" style="width: 125px;">Harga Jual</th>
+            <% if (typeof canSeeCost !== 'undefined' && canSeeCost) { %>
+            <th class="text-center text-nowrap" style="width: 95px;">Margin</th>
+            <% } %>
+            <th class="text-center text-nowrap" style="width: 135px;">Stok</th>
+            <th class="text-center text-nowrap" style="width: 100px;">Status</th>
+            <th class="text-end text-nowrap" style="width: 135px;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (produk.length === 0) { %>
+          <tr class="empty-state-row">
+            <td colspan="<%= (typeof canSeeCost !== 'undefined' && canSeeCost) ? 8 : 6 %>" class="text-center py-5">
+              <div class="py-4">
+                <i class="bi bi-box-seam text-muted" style="font-size: 2.5rem; opacity: 0.5;"></i>
+                <h6 class="fw-semibold text-muted mt-3 mb-1">Belum ada produk terdaftar</h6>
+                <p class="text-muted small mb-3">Mulai tambahkan produk baru untuk mengisi katalog inventaris.</p>
+                <a href="/produk/tambah" class="btn btn-primary btn-sm">
+                  <i class="bi bi-plus-lg me-1"></i> Tambah Produk
+                </a>
+              </div>
+            </td>
+          </tr>
+          <% } %>
+
+          <% produk.forEach(function(p) { %>
+          <% 
+            const stokVal = p.stok || 0;
+            const stokMin = p.stok_minimum || 0;
+            let stockState = 'normal';
+            if (stokVal <= 0) stockState = 'habis';
+            else if (stokVal <= stokMin) stockState = 'menipis';
+
+            const beli = p.harga_beli || 0;
+            const jual = p.harga_jual || 0;
+            const marginNominal = jual - beli;
+            const marginPct = (beli > 0) ? ((marginNominal / beli) * 100).toFixed(0) : 0;
+          %>
+          <tr class="product-row"
+              data-kategori="<%= p.kategori || '' %>" 
+              data-status="<%= p.status || '' %>" 
+              data-stock-state="<%= stockState %>"
+              id="row-produk-<%= p.id %>">
+            
+            <!-- 1. Produk (Foto + Nama + SKU + Satuan) -->
+            <td>
+              <div class="d-flex align-items-center gap-3">
+                <div class="product-thumb-container">
+                  <% if (p.foto) { %>
+                    <img src="<%= p.foto %>" alt="<%= p.nama %>" class="product-thumb-img">
+                  <% } else { %>
+                    <div class="product-thumb-fallback">
+                      <i class="bi bi-box-seam"></i>
+                    </div>
+                  <% } %>
+                </div>
+                <div class="min-w-0 flex-grow-1">
+                  <a href="/produk/<%= p.id %>/edit" class="product-name-title text-decoration-none" title="Edit <%= p.nama %>">
+                    <%= p.nama %>
+                  </a>
+                  <div class="d-flex align-items-center gap-2 mt-1">
+                    <span class="product-sku-code"><%= p.sku %></span>
+                    <span class="product-unit-tag">• <%= p.satuan || 'pcs' %></span>
+                  </div>
+                </div>
+              </div>
+            </td>
+
+            <!-- 2. Kategori -->
+            <td class="text-nowrap">
+              <span class="badge-kategori">
+                <i class="bi bi-tag-fill me-1 opacity-50"></i><%= p.kategori || 'Tanpa Kategori' %>
+              </span>
+            </td>
+
+            <!-- 3. Harga Beli (Hanya Admin) -->
+            <% if (typeof canSeeCost !== 'undefined' && canSeeCost) { %>
+            <td class="text-end text-nowrap">
+              <div class="price-buy">Rp <%= beli.toLocaleString('id-ID') %></div>
+            </td>
+            <% } %>
+
+            <!-- 4. Harga Jual -->
+            <td class="text-end text-nowrap">
+              <div class="price-sell">Rp <%= jual.toLocaleString('id-ID') %></div>
+            </td>
+
+            <!-- 5. Margin Keuntungan (Hanya Admin) -->
+            <% if (typeof canSeeCost !== 'undefined' && canSeeCost) { %>
+            <td class="text-center text-nowrap">
+              <span class="badge-margin <%= marginNominal >= 0 ? '' : 'negative' %>" title="Margin: Rp <%= marginNominal.toLocaleString('id-ID') %>">
+                <%= marginNominal >= 0 ? '+' : '' %><%= marginPct %>%
+              </span>
+            </td>
+            <% } %>
+
+            <!-- 6. Stok Fisik & Update Cepat -->
+            <td class="text-center text-nowrap">
+              <div class="stock-pill-wrapper" 
+                   onclick="openQuickStockModal(<%= p.id %>, '<%= p.nama.replace(/'/g, "\\'") %>', <%= stokVal %>, <%= stokMin %>, '<%= p.satuan || 'pcs' %>')"
+                   title="Klik untuk ubah stok cepat">
+                <span class="stock-number" id="stock-num-<%= p.id %>"><%= stokVal %></span>
+                <% if (stokVal <= 0) { %>
+                  <span class="stock-status-tag out" id="stock-tag-<%= p.id %>">Habis</span>
+                <% } else if (stokVal <= stokMin) { %>
+                  <span class="stock-status-tag low" id="stock-tag-<%= p.id %>">Min <%= stokMin %></span>
+                <% } else { %>
+                  <span class="stock-status-tag safe" id="stock-tag-<%= p.id %>">Aman</span>
+                <% } %>
+                <i class="bi bi-pencil-fill stock-edit-hint"></i>
+              </div>
+            </td>
+
+            <!-- 7. Status -->
+            <td class="text-center text-nowrap">
+              <span class="badge-status <%= p.status %>"><%= p.status.charAt(0).toUpperCase() + p.status.slice(1) %></span>
+            </td>
+
+            <!-- 8. Aksi -->
+            <td class="text-end text-nowrap">
+              <div class="d-flex justify-content-end gap-1">
+                <!-- Quick Detail -->
+                <button type="button" class="btn btn-action-view btn-icon btn-sm" title="Lihat Detail"
+                        onclick='openDetailModal(<%- JSON.stringify(p).replace(/'/g, "&#39;") %>)'>
+                  <i class="bi bi-eye"></i>
+                </button>
+                <!-- Edit -->
+                <a href="/produk/<%= p.id %>/edit" class="btn btn-action-edit btn-icon btn-sm" title="Edit Produk">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <!-- Barcode -->
+                <a href="/produk/barcode?id=<%= p.id %>" class="btn btn-action-barcode btn-icon btn-sm" title="Cetak Barcode" target="_blank">
+                  <i class="bi bi-upc"></i>
+                </a>
+                <!-- Delete -->
+                <button class="btn btn-action-delete btn-icon btn-sm" title="Hapus"
+                        data-bs-toggle="modal" data-bs-target="#deleteModal"
+                        data-name="<%= p.nama %>" data-url="/produk/<%= p.id %>">
+                  <i class="bi bi-trash3"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <% }); %>
+
+          <!-- Row when search yields 0 items -->
+          <tr id="noResultsRow" style="display: none;">
+            <td colspan="<%= (typeof canSeeCost !== 'undefined' && canSeeCost) ? 8 : 6 %>" class="text-center py-5">
+              <div class="py-3">
+                <i class="bi bi-search text-muted" style="font-size: 2rem; opacity: 0.4;"></i>
+                <h6 class="fw-medium text-muted mt-2 mb-1">Tidak ada produk yang cocok</h6>
+                <p class="text-muted small mb-0">Coba ubah kata kunci pencarian atau filter kategori/stok.</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Table Footer -->
+    <div class="table-footer">
+      <span class="table-info">Menampilkan <strong id="visibleCount"><%= produk.length %></strong> dari <strong><%= produk.length %></strong> produk</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL: UPDATE CEPAT STOK (AJAX)
+     ============================================================ -->
+<div class="modal fade" id="quickStockModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h6 class="modal-title fw-bold">Update Stok Cepat</h6>
+          <span class="text-muted" style="font-size:0.75rem;" id="qsProductTitle">-</span>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="qsProductId">
+        
+        <div class="text-center mb-3">
+          <label class="form-label text-muted" style="font-size:0.78rem;">Jumlah Stok Fisik Saat Ini</label>
+          <div class="input-group justify-content-center">
+            <button class="btn btn-outline-danger" type="button" onclick="adjustQuickStock(-1)"><i class="bi bi-dash-lg"></i></button>
+            <input type="number" class="form-control text-center fw-bold" id="qsStockInput" min="0" style="max-width:90px;font-size:1.15rem;">
+            <button class="btn btn-outline-success" type="button" onclick="adjustQuickStock(1)"><i class="bi bi-plus-lg"></i></button>
+          </div>
+          <span class="text-muted" style="font-size:0.72rem;" id="qsUnitText">pcs</span>
+        </div>
+
+        <!-- Quick increment shortcuts -->
+        <div class="d-flex justify-content-center gap-1 mb-2">
+          <button type="button" class="btn btn-outline-primary btn-sm py-1 px-2 fw-semibold" style="font-size:0.75rem;" onclick="adjustQuickStock(5)">+5</button>
+          <button type="button" class="btn btn-outline-primary btn-sm py-1 px-2 fw-semibold" style="font-size:0.75rem;" onclick="adjustQuickStock(10)">+10</button>
+          <button type="button" class="btn btn-outline-primary btn-sm py-1 px-2 fw-semibold" style="font-size:0.75rem;" onclick="adjustQuickStock(25)">+25</button>
+          <button type="button" class="btn btn-outline-primary btn-sm py-1 px-2 fw-semibold" style="font-size:0.75rem;" onclick="adjustQuickStock(50)">+50</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btnSaveQuickStock" onclick="submitQuickStock()">
+          <i class="bi bi-check-lg me-1"></i> Simpan Stok
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL: DETAIL LENGKAP PRODUK
+     ============================================================ -->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">Detail Informasi Produk</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="d-flex gap-3 align-items-start mb-3">
+          <div style="width:100px;height:100px;border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--border-color);flex-shrink:0;background:var(--bg-body);display:flex;align-items:center;justify-content:center;">
+            <img id="detailFoto" src="" alt="Foto Produk" style="width:100%;height:100%;object-fit:cover;display:none;">
+            <i id="detailFotoPlaceholder" class="bi bi-image text-muted" style="font-size:2.5rem;"></i>
+          </div>
+          <div>
+            <div class="badge-status aktif mb-1" id="detailStatus">Aktif</div>
+            <h5 class="fw-bold mb-1" id="detailNama">-</h5>
+            <div style="font-family:var(--font-mono);font-size:0.82rem;color:var(--text-secondary);" id="detailSku">-</div>
+            <div class="text-muted mt-1" style="font-size:0.78rem;">
+              Kategori: <strong id="detailKategori">-</strong> | Satuan: <strong id="detailSatuan">-</strong>
+            </div>
+          </div>
+        </div>
+
+        <hr style="border-color:var(--border-light);">
+
+        <div class="row g-2 mb-3">
+          <% if (typeof canSeeCost !== 'undefined' && canSeeCost) { %>
+          <div class="col-6">
+            <div class="p-2 border rounded" style="background:var(--bg-body);">
+              <span class="text-muted" style="font-size:0.72rem;display:block;">Harga Beli / Modal</span>
+              <strong class="text-money" style="font-size:0.95rem;" id="detailHargaBeli">-</strong>
+            </div>
+          </div>
+          <% } %>
+          <div class="<%= (typeof canSeeCost !== 'undefined' && canSeeCost) ? 'col-6' : 'col-6' %>">
+            <div class="p-2 border rounded" style="background:var(--bg-body);">
+              <span class="text-muted" style="font-size:0.72rem;display:block;">Harga Jual</span>
+              <strong class="text-money text-primary" style="font-size:0.95rem;" id="detailHargaJual">-</strong>
+            </div>
+          </div>
+          <% if (typeof canSeeCost !== 'undefined' && canSeeCost) { %>
+          <div class="col-6">
+            <div class="p-2 border rounded" style="background:var(--bg-body);">
+              <span class="text-muted" style="font-size:0.72rem;display:block;">Margin Keuntungan</span>
+              <strong class="text-success" style="font-size:0.95rem;" id="detailMargin">-</strong>
+            </div>
+          </div>
+          <% } %>
+          <div class="<%= (typeof canSeeCost !== 'undefined' && canSeeCost) ? 'col-6' : 'col-6' %>">
+            <div class="p-2 border rounded" style="background:var(--bg-body);">
+              <span class="text-muted" style="font-size:0.72rem;display:block;">Stok Fisik / Min</span>
+              <strong style="font-size:0.95rem;" id="detailStok">-</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer d-flex justify-content-between">
+        <a href="#" id="detailBarcodeLink" class="btn btn-action-barcode-modal btn-sm" target="_blank">
+          <i class="bi bi-upc me-1"></i> Cetak Barcode
+        </a>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+          <a href="#" id="detailEditLink" class="btn btn-action-edit-modal btn-sm">
+            <i class="bi bi-pencil me-1"></i> Edit Produk
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/produk.js"></script>

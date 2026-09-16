@@ -1,0 +1,176 @@
+/* ============================================================
+   SCORIP POS — Print / Struk Stylesheet
+   ============================================================ */
+@media print {
+  @page {
+    margin: 0;
+    size: 80mm auto;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+    font-family: 'Courier New', monospace;
+    color: #000;
+    background: #fff;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
+
+.struk-container {
+  width: 80mm;
+  margin: 0 auto;
+  padding: 8mm 5mm;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: #000;
+  background: #fff;
+}
+
+.struk-header {
+  text-align: center;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed #000;
+}
+
+.struk-store-name {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+.struk-store-info {
+  font-size: 10px;
+  line-height: 1.4;
+  white-space: pre-line;
+}
+
+.struk-divider {
+  border: none;
+  border-top: 1px dashed #000;
+  margin: 6px 0;
+}
+
+.struk-info {
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.struk-info-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.struk-items {
+  margin: 6px 0;
+}
+
+.struk-item {
+  margin-bottom: 4px;
+}
+
+.struk-item-name {
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.struk-item-detail {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  padding-left: 8px;
+}
+
+.struk-total-section {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed #000;
+}
+
+.struk-total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  padding: 1px 0;
+}
+
+.struk-total-row.grand-total {
+  font-size: 14px;
+  font-weight: bold;
+  border-top: 1px dashed #000;
+  margin-top: 4px;
+  padding-top: 4px;
+}
+
+.struk-footer {
+  text-align: center;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed #000;
+  font-size: 10px;
+  line-height: 1.4;
+  white-space: pre-line;
+}
+
+/* Print barcode page */
+.barcode-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 10mm;
+}
+
+.barcode-label {
+  text-align: center;
+  padding: 4px;
+  border: 1px solid #ddd;
+  page-break-inside: avoid;
+}
+
+.barcode-label svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.barcode-label-sku {
+  font-size: 9px;
+  font-family: 'Courier New', monospace;
+  margin-top: 2px;
+}
+
+.barcode-label-name {
+  font-size: 8px;
+  font-family: Arial, sans-serif;
+  color: #333;
+  max-height: 20px;
+  overflow: hidden;
+}
+
+/* Screen preview (non-print) */
+@media screen {
+  .print-preview-wrapper {
+    background: #e5e5e5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem;
+  }
+
+  .print-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .struk-container {
+    background: #fff;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.15);
+    border-radius: 4px;
+  }
+}

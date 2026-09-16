@@ -1,0 +1,163 @@
+<!-- Dashboard Page -->
+<div class="animate-fade-in-up">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <h2 class="page-title">Dashboard</h2>
+      <span class="page-subtitle">Selamat datang kembali, <%= (typeof user !== 'undefined' && user && user.nama) ? user.nama : 'Admin' %>!</span>
+    </div>
+    <div class="page-header-actions">
+      <a href="/pos" class="btn btn-primary">
+        <i class="bi bi-cart3"></i> Buka Kasir
+      </a>
+    </div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="row g-3 mb-4 stagger-children">
+    <div class="col-sm-6 col-xl-3">
+      <div class="stat-card">
+        <div class="stat-card-icon primary">
+          <i class="bi bi-box-seam"></i>
+        </div>
+        <div class="stat-card-info">
+          <div class="stat-card-label">Total Produk</div>
+          <div class="stat-card-value"><%= data.total_produk %></div>
+          <div class="stat-card-sub">SKU aktif</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <div class="stat-card">
+        <div class="stat-card-icon success">
+          <i class="bi bi-receipt"></i>
+        </div>
+        <div class="stat-card-info">
+          <div class="stat-card-label">Transaksi Hari Ini</div>
+          <div class="stat-card-value"><%= data.transaksi_hari_ini %></div>
+          <div class="stat-card-sub">
+            <span class="stat-card-trend up"><i class="bi bi-arrow-up"></i> 12%</span>
+            dari kemarin
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <div class="stat-card">
+        <div class="stat-card-icon accent">
+          <i class="bi bi-wallet2"></i>
+        </div>
+        <div class="stat-card-info">
+          <div class="stat-card-label">Pendapatan Bulan Ini</div>
+          <div class="stat-card-value" style="font-size:1.3rem;"><%= 'Rp ' + data.pendapatan_bulan.toLocaleString('id-ID') %></div>
+          <div class="stat-card-sub">
+            <span class="stat-card-trend up"><i class="bi bi-arrow-up"></i> 8%</span>
+            dari bulan lalu
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <div class="stat-card">
+        <div class="stat-card-icon danger">
+          <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <div class="stat-card-info">
+          <div class="stat-card-label">Stok Alert</div>
+          <div class="stat-card-value"><%= data.stok_alert %></div>
+          <div class="stat-card-sub">produk stok rendah</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="row g-3 mb-4">
+    <!-- Penjualan 7 Hari -->
+    <div class="col-lg-8">
+      <div class="card h-100">
+        <div class="card-header">
+          <h6 class="card-header-title"><i class="bi bi-graph-up me-2 text-primary"></i>Penjualan 7 Hari Terakhir</h6>
+        </div>
+        <div class="card-body">
+          <canvas id="chartPenjualan" height="280"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Penjualan per Kategori -->
+    <div class="col-lg-4">
+      <div class="card h-100">
+        <div class="card-header">
+          <h6 class="card-header-title"><i class="bi bi-pie-chart me-2 text-secondary"></i>Per Kategori</h6>
+        </div>
+        <div class="card-body d-flex align-items-center justify-content-center" style="min-height: 280px;">
+          <canvas id="chartKategori" height="260"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Row -->
+  <div class="row g-3">
+    <!-- Produk Terlaris -->
+    <div class="col-lg-5">
+      <div class="card h-100">
+        <div class="card-header">
+          <h6 class="card-header-title"><i class="bi bi-trophy me-2 text-warning"></i>Produk Terlaris</h6>
+        </div>
+        <div class="card-body">
+          <canvas id="chartTerlaris" height="220"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transaksi Terakhir -->
+    <div class="col-lg-7">
+      <div class="card h-100">
+        <div class="card-header">
+          <h6 class="card-header-title"><i class="bi bi-clock-history me-2 text-info"></i>Transaksi Terakhir</h6>
+          <a href="/pos/riwayat" class="btn btn-ghost btn-sm">
+            Lihat Semua <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+        <div class="card-body p-0">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>No. Transaksi</th>
+                <th>Pelanggan</th>
+                <th>Total</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% data.transaksi_terakhir.forEach(function(trx) { %>
+              <tr>
+                <td>
+                  <a href="/pos/transaksi/<%= trx.id %>" style="font-weight:550;font-size:0.82rem;">
+                    <%= trx.no_transaksi %>
+                  </a>
+                </td>
+                <td style="font-size:0.82rem;"><%= trx.pelanggan %></td>
+                <td class="text-money" style="font-size:0.82rem;">Rp <%= trx.total.toLocaleString('id-ID') %></td>
+                <td>
+                  <span class="badge-status <%= trx.status %>"><%= trx.status.charAt(0).toUpperCase() + trx.status.slice(1) %></span>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="/js/dashboard.js"></script>
+<script>
+  // Pass data to dashboard.js
+  window.dashboardData = <%- JSON.stringify(data) %>;
+</script>

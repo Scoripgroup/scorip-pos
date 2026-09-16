@@ -1,0 +1,198 @@
+<!-- Manajemen User -->
+<div class="animate-fade-in-up">
+  <div class="page-header">
+    <div class="page-header-left">
+      <h2 class="page-title">Manajemen User</h2>
+      <span class="page-subtitle"><%= users.length %> user terdaftar</span>
+    </div>
+    <div class="page-header-actions">
+      <a href="/pengaturan?tab=hak-akses" class="btn btn-outline-primary">
+        <i class="bi bi-shield-check me-1"></i> Atur Hak Akses & Role Tabel
+      </a>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userModal" onclick="resetUserForm()">
+        <i class="bi bi-plus-lg me-1"></i> Tambah User
+      </button>
+    </div>
+  </div>
+
+  <!-- Banner Pengaturan Hak Akses Tabel -->
+  <div class="alert alert-info py-2 px-3 mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2 shadow-sm border-0">
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi bi-shield-lock fs-4 text-info-emphasis"></i>
+      <span class="small text-dark">
+        Ingin mengatur checkbox wewenang / tabel apa saja yang bisa dilihat user selain Admin (seperti <strong>Tabel Produk</strong>, <strong>Laporan</strong>, dll)?
+      </span>
+    </div>
+    <a href="/pengaturan?tab=hak-akses" class="btn btn-sm btn-primary">
+      <i class="bi bi-sliders me-1"></i> Buka Matriks Hak Akses Tabel
+    </a>
+  </div>
+
+  <div class="table-wrapper">
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th class="text-nowrap" style="width:60px;">#</th>
+            <th class="text-nowrap" style="width:140px;">Username</th>
+            <th style="min-width:180px;">Nama Lengkap</th>
+            <th class="text-nowrap" style="width:120px;">Role</th>
+            <th class="text-nowrap" style="width:120px;">Status</th>
+            <th class="text-nowrap" style="width:160px;">Last Login</th>
+            <th class="text-end text-nowrap" style="width:130px;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% users.forEach(function(u, i) { %>
+          <tr>
+            <td style="color:var(--text-muted);"><%= i + 1 %></td>
+            <td style="font-family:var(--font-mono);font-size:0.82rem;font-weight:550;"><%= u.username %></td>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="avatar-sm"><%= u.nama.charAt(0).toUpperCase() %></div>
+                <span style="font-weight:500;"><%= u.nama %></span>
+              </div>
+            </td>
+            <td>
+              <span style="background:<%= u.role === 'Admin' ? 'var(--primary-bg)' : 'var(--bg-body)' %>;color:<%= u.role === 'Admin' ? 'var(--primary)' : 'var(--text-secondary)' %>;padding:0.2rem 0.6rem;border-radius:var(--radius-full);font-size:0.75rem;font-weight:600;">
+                <%= u.role %>
+              </span>
+            </td>
+            <td><span class="badge-status <%= u.status %>"><%= u.status.charAt(0).toUpperCase() + u.status.slice(1) %></span></td>
+            <td style="font-size:0.78rem;color:var(--text-muted);" class="text-nowrap"><%= u.last_login ? new Date(u.last_login).toLocaleDateString('id-ID', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '-' %></td>
+            <td class="text-end">
+              <div class="d-flex justify-content-end gap-1">
+                <button class="btn btn-ghost btn-icon btn-sm" title="Edit" data-bs-toggle="modal" data-bs-target="#userModal" onclick="editUser(<%= JSON.stringify(u).replace(/"/g, '&quot;') %>)"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-ghost btn-icon btn-sm text-warning" title="Reset Password" data-bs-toggle="modal" data-bs-target="#resetPasswordModal" onclick="openResetPasswordModal(<%= u.id %>, '<%= u.username %>', '<%= u.nama.replace(/'/g, "\\'") %>')"><i class="bi bi-key"></i></button>
+                <% if (u.id !== 1) { %>
+                <button class="btn btn-ghost btn-icon btn-sm" title="Hapus" data-bs-toggle="modal" data-bs-target="#deleteModal" data-name="<%= u.username %>" data-url="/users/<%= u.id %>"><i class="bi bi-trash3"></i></button>
+                <% } %>
+              </div>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="userModalTitle">Tambah User</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="/users" method="POST" id="userForm">
+        <input type="hidden" name="_method" id="userMethod" value="POST">
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6"><label class="form-label">Username <span class="text-danger">*</span></label><input type="text" class="form-control" name="username" id="uUsername" required></div>
+            <div class="col-md-6"><label class="form-label">Nama Lengkap <span class="text-danger">*</span></label><input type="text" class="form-control" name="nama" id="uNama" required></div>
+            <div class="col-md-6" id="uPasswordGroup"><label class="form-label">Password <span class="text-danger">*</span></label><input type="password" class="form-control" name="password" id="uPassword" minlength="6"></div>
+            <div class="col-md-3"><label class="form-label">Role</label><select class="form-select" name="role" id="uRole"><option value="Staff">Staff</option><option value="Admin">Admin</option></select></div>
+            <div class="col-md-3"><label class="form-label">Status</label><select class="form-select" name="status" id="uStatus"><option value="aktif">Aktif</option><option value="nonaktif">Nonaktif</option></select></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-check-lg me-1"></i> Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Reset Password Modal -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h6 class="modal-title fw-bold">Reset Kata Sandi</h6>
+          <span class="text-muted" style="font-size:0.75rem;" id="resetUserSubtitle">Pengguna: -</span>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="" method="POST" id="resetPasswordForm">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Kata Sandi Baru <span class="text-danger">*</span></label>
+            <div class="input-group input-group-sm">
+              <input type="text" class="form-control fw-bold font-monospace" name="new_password" id="resetNewPassInput" minlength="6" placeholder="Min. 6 karakter" required>
+              <button class="btn btn-outline-secondary" type="button" onclick="generateRandomPassword()" title="Buat password acak">
+                <i class="bi bi-shuffle"></i>
+              </button>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-1">
+              <span class="text-muted" style="font-size:0.7rem;">Auto-generate sandi baru.</span>
+              <button type="button" class="btn btn-link p-0 text-decoration-none" style="font-size:0.72rem;" onclick="copyGeneratedPassword()">
+                <i class="bi bi-clipboard me-1"></i> Salin
+              </button>
+            </div>
+          </div>
+          <div class="alert alert-warning py-2 px-3 mb-0" style="font-size:0.75rem;">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i> User harus login dengan kata sandi baru setelah ini disimpan.
+          </div>
+        </div>
+        <div class="modal-footer py-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-warning btn-sm fw-semibold">
+            <i class="bi bi-key-fill me-1"></i> Terapkan Kata Sandi
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function resetUserForm(){
+  document.getElementById('userModalTitle').textContent='Tambah User';
+  document.getElementById('userForm').action='/users';
+  document.getElementById('userMethod').value='POST';
+  document.getElementById('uPasswordGroup').style.display='';
+  document.getElementById('uPassword').required=true;
+  ['uUsername','uNama','uPassword'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('uRole').value='Staff';
+  document.getElementById('uStatus').value='aktif';
+}
+function editUser(u){
+  document.getElementById('userModalTitle').textContent='Edit User';
+  document.getElementById('userForm').action='/users/'+u.id;
+  document.getElementById('userMethod').value='PUT';
+  document.getElementById('uPasswordGroup').style.display='none';
+  document.getElementById('uPassword').required=false;
+  document.getElementById('uUsername').value=u.username;
+  document.getElementById('uNama').value=u.nama;
+  document.getElementById('uRole').value=u.role;
+  document.getElementById('uStatus').value=u.status;
+}
+function openResetPasswordModal(id, username, nama) {
+  document.getElementById('resetPasswordForm').action = '/users/' + id + '/reset-password';
+  document.getElementById('resetUserSubtitle').textContent = 'Pengguna: ' + nama + ' (@' + username + ')';
+  document.getElementById('resetNewPassInput').value = '';
+  generateRandomPassword();
+}
+function generateRandomPassword() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$';
+  let pass = '';
+  for (let i = 0; i < 8; i++) {
+    pass += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  const input = document.getElementById('resetNewPassInput');
+  if (input) input.value = pass;
+}
+function copyGeneratedPassword() {
+  const input = document.getElementById('resetNewPassInput');
+  if (!input || !input.value) return;
+  navigator.clipboard.writeText(input.value).then(() => {
+    alert('Kata sandi "' + input.value + '" berhasil disalin ke clipboard!');
+  }).catch(() => {
+    input.select();
+    document.execCommand('copy');
+    alert('Kata sandi disalin!');
+  });
+}
+</script>

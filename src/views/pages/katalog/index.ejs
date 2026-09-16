@@ -1,0 +1,81 @@
+<!-- Katalog Publik -->
+<nav class="katalog-navbar">
+  <div class="katalog-navbar-inner">
+    <a href="/katalog" class="katalog-brand">
+      <div class="katalog-brand-icon"><i class="bi bi-shop"></i></div>
+      <span class="katalog-brand-name"><%= settings.nama_aplikasi %></span>
+    </a>
+    <a href="https://wa.me/<%= (settings.telepon_toko || '').replace(/[^0-9]/g, '') %>" class="katalog-wa-btn" target="_blank">
+      <i class="bi bi-whatsapp"></i> Chat Kami
+    </a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<div class="katalog-hero">
+  <div class="katalog-hero-content">
+    <h1 class="katalog-hero-title">Katalog Produk</h1>
+    <p class="katalog-hero-subtitle"><%= settings.sub_judul %></p>
+    <div class="katalog-hero-search">
+      <i class="bi bi-search"></i>
+      <input type="text" id="katalogSearch" placeholder="Cari produk yang Anda butuhkan...">
+    </div>
+  </div>
+</div>
+
+<!-- Products -->
+<section class="katalog-section" data-phone="<%= (settings.telepon_toko || '').replace(/[^0-9]/g, '') %>">
+  <h2 class="katalog-section-title">Semua Produk</h2>
+
+  <!-- Category Filter -->
+  <div class="katalog-categories">
+    <button class="pos-category-btn active" data-category="all">Semua</button>
+    <% kategori.forEach(function(k) { %>
+      <button class="pos-category-btn" data-category="<%= k.id %>"><%= k.nama %></button>
+    <% }); %>
+  </div>
+
+  <!-- Product Grid -->
+  <div class="katalog-product-grid" id="katalogGrid">
+    <% produk.forEach(function(p) { %>
+    <div class="katalog-product-card" data-nama="<%= p.nama.toLowerCase() %>" data-kategori="<%= p.kategori_id %>">
+      <div class="katalog-product-img">
+        <% if (p.foto) { %>
+          <img src="<%= p.foto %>" alt="<%= p.nama %>">
+        <% } else { %>
+          <i class="bi bi-image"></i>
+        <% } %>
+      </div>
+
+      <% if (p.stok <= 0) { %>
+        <span class="katalog-product-stock-badge out-of-stock">Habis</span>
+      <% } else if (p.stok <= p.stok_minimum) { %>
+        <span class="katalog-product-stock-badge low-stock">Stok Terbatas</span>
+      <% } else { %>
+        <span class="katalog-product-stock-badge in-stock">Tersedia</span>
+      <% } %>
+
+      <div class="katalog-product-info">
+        <div class="katalog-product-category"><%= p.kategori %></div>
+        <h3 class="katalog-product-name"><%= p.nama %></h3>
+        <div class="katalog-product-price">Rp <%= p.harga_jual.toLocaleString('id-ID') %></div>
+        <% if (p.stok > 0) { %>
+        <button class="katalog-product-order-btn"
+                onclick="orderViaWA('<%= p.nama %>', '<%= p.harga_jual %>')">
+          <i class="bi bi-whatsapp"></i> Pesan via WhatsApp
+        </button>
+        <% } else { %>
+        <button class="katalog-product-order-btn" disabled style="background:var(--text-light);cursor:not-allowed;">
+          Stok Habis
+        </button>
+        <% } %>
+      </div>
+    </div>
+    <% }); %>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="katalog-footer">
+  <p class="katalog-footer-text">&copy; 2025 <%= settings.nama_aplikasi %>. Semua hak dilindungi.</p>
+</footer>

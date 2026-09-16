@@ -1,0 +1,215 @@
+# Product Requirements Document (PRD)
+
+## SCORIP POS — Sistem POS Kasir & PO Import Barang
+
+---
+
+## 1. Latar Belakang & Ringkasan
+
+SCORIP POS adalah aplikasi web internal untuk mengelola dua alur bisnis yang saling terhubung:
+
+1. **PO Import** — pengadaan barang dari supplier luar negeri (dengan kurs RMB), termasuk pelacakan pengiriman lewat forwarder hingga barang masuk ke stok.
+2. **POS Kasir** — penjualan barang ke pelanggan di titik penjualan (kasir toko), termasuk cetak struk dan notifikasi WhatsApp.
+
+Dokumen ini mendefinisikan requirement produk sekaligus target arsitektur teknis, dengan fungsionalitas yang dipertahankan setara dengan sistem eksisting.
+
+## 2. Target Stack Teknis
+
+| Layer                        | Teknologi                                                              |
+| ---------------------------- | ---------------------------------------------------------------------- |
+| Runtime                      | Node.js                                                                |
+| Backend framework            | Express.js                                                             |
+| Database (development/lokal) | SQLite via `better-sqlite3`                                            |
+| Database (production/deploy) | PostgreSQL (server Ubuntu)                                             |
+| View engine / UI             | EJS (server-side rendering)                                            |
+| CSS framework                | Bootstrap 5                                                            |
+| Ikon                         | Bootstrap Icons                                                        |
+| Autentikasi                  | Session-based (`express-session`), password hash `bcrypt`              |
+| Chart                        | Chart.js (tetap dipakai, di-render lewat partial EJS + client-side JS) |
+| Scan barcode/QR              | `html5-qrcode` (client-side, tetap dipakai)                            |
+| Cetak barcode                | `JsBarcode` (client-side, tetap dipakai)                               |
+
+### 2.1 Strategi Dual-Database (SQLite ↔ PostgreSQL)
+
+Karena requirement menyebutkan SQLite untuk pengembangan/lokal dan PostgreSQL untuk deploy produksi di Ubuntu, backend **wajib menggunakan lapisan akses data yang portable antar keduanya**, bukan raw query yang terikat ke satu dialek SQL. Rekomendasi:
+
+- Gunakan **query builder** (mis. Knex.js) atau **ORM ringan** (mis. Prisma/Sequelize) yang mendukung SQLite dan PostgreSQL dengan konfigurasi koneksi berbeda per environment (`.env`: `DB_CLIENT=sqlite` vs `DB_CLIENT=pg`).
+- Skema tabel & migration ditulis sekali, dijalankan ke kedua dialek.
+- Untuk fitur yang sensitif terhadap dialek (auto-increment, tipe tanggal, JSON), gunakan tipe data yang didukung kedua sisi atau abstraksi dari query builder.
+- Environment **development** default ke `better-sqlite3` (tanpa perlu instalasi server DB terpisah, memudahkan setup lokal).
+- Environment **production** (Ubuntu) memakai PostgreSQL, dikonfigurasi lewat connection string (`DATABASE_URL`).
+
+## 3. Tujuan Produk
+
+- Menyatukan proses pengadaan barang import dan penjualan ritel dalam satu sistem, dengan stok yang selalu sinkron antara kedua alur.
+- Memberi visibilitas biaya riil per PO (landed cost) agar harga jual dan margin bisa dihitung akurat.
+- Mempercepat transaksi kasir (POS) dengan pencarian produk cepat, scan barcode/QR, dan cetak struk.
+- Menyediakan jejak audit (siapa melakukan apa) dan kontrol akses berbasis peran.
+- Migrasi ke arsitektur server standar (Node.js/Express/PostgreSQL) agar lebih scalable, mudah di-hosting mandiri (self-hosted di Ubuntu), dan tidak lagi bergantung pada kuota/batasan Google Apps Script.
+
+## 4. Target Pengguna & Peran
+
+| Peran           | Deskripsi                | Hak Akses Utama                                                                                                                 |
+| --------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Admin**       | Pemilik/pengelola bisnis | Akses penuh: PO Import, Supplier, Forwarder, Pengaturan, User Management, semua laporan                                         |
+| **Staff/Kasir** | Karyawan kasir           | POS Kasir, Order Online, lihat Produk & Pelanggan, Stok Opname; **tidak** bisa akses PO Import, Supplier, Forwarder, Pengaturan |
+
+Kontrol akses diterapkan sebagai **Express middleware** (mis. `requireAuth`, `requireRole('Admin')`) yang dipasang di setiap route, bukan hanya disembunyikan di tampilan EJS — konsisten dengan prinsip sistem lama yang validasi role-nya ada di backend.
+
+## 5. Ruang Lingkup Fungsional (Modul)
+
+### 5.1 Autentikasi & Sesi
+
+- Login via form (EJS) → POST ke `/auth/login`; password diverifikasi dengan **bcrypt** (upgrade dari SHA-256 di sistem lama, demi keamanan lebih baik).
+- Sesi disimpan server-side (`express-session`, dengan store yang disesuaikan environment — `connect-sqlite3` untuk dev, `connect-pg-simple` untuk produksi Postgres).
+- **Rate limiting login**: 5 kali gagal → kunci sementara 15 menit per username, diimplementasikan lewat middleware (mis. `express-rate-limit` dikombinasikan dengan pencatatan percobaan gagal di tabel/cache).
+- Middleware `requireAuth` memvalidasi sesi di setiap route terproteksi; redirect ke halaman login bila tidak valid/kedaluwarsa.
+- Logout menghapus sesi di server.
+- Login ditolak bila status user nonaktif.
+
+### 5.2 Dashboard
+
+- Route `GET /dashboard` — render EJS dengan ringkasan angka kunci (total stok, jumlah transaksi hari ini, dsb.) dan grafik Chart.js (data di-fetch lewat endpoint JSON internal atau di-inject langsung ke view).
+- Ringkasan penjualan produk untuk analisis performa produk.
+
+### 5.3 PO Import (Khusus Admin)
+
+- Halaman list PO + form buat/edit (EJS + Bootstrap modal/form).
+- **Buat/Edit PO** (`POST/PUT /po-import`): header PO (nomor PO, tanggal, supplier, kurs RMB, biaya forwarder, ongkir lokal, tipe dasar biaya) + daftar item (qty, harga per item RMB, jumlah koli).
+- **Perhitungan otomatis** (logic dipindah ke service layer Node.js, bukan lagi client-side GAS):
+  - Total RMB = Σ(qty × harga RMB per item)
+  - Total Barang (IDR) = Nominal TF **atau** (Total RMB × Kurs), tergantung `BaseType`
+  - Total Landed Cost = Total Barang + Biaya Forwarder + Ongkir Lokal (status "Dalam Perjalanan"), atau berbasis Nominal DP/Total Barang untuk status lain
+- **Tracking status pengiriman**: riwayat status di tabel `po_status_history` (nomor resi, forwarder, estimasi tiba, tanggal sampai forwarder, tanggal tiba aktual, batas kirim PO).
+- **Update status PO** (`PATCH /po-import/:id/status`) — mencatat histori tiap perubahan.
+- **Hapus PO** (`DELETE /po-import/:id`).
+- Saat barang diterima, terhubung dengan modul Produk untuk update stok (dalam satu **transaksi database**, menggantikan `LockService` di sistem lama).
+
+### 5.4 POS Kasir
+
+- Halaman kasir (EJS + Bootstrap) dengan input keranjang dinamis (client-side JS + partial render).
+- Transaksi penjualan (`POST /pos/transaksi`): hitung subtotal, diskon per item & transaksi, total, metode pembayaran, kembalian — dalam satu transaksi DB (insert header + detail + update stok sekaligus, rollback bila gagal).
+- Update transaksi (`PUT /pos/transaksi/:id`), hapus (`DELETE /pos/transaksi/:id`), update status (`PATCH /pos/transaksi/:id/status`).
+- Input nomor resi pengiriman (`PATCH /pos/transaksi/:id/resi`).
+- Pengurangan stok otomatis; pencatatan laba kotor per baris detail transaksi.
+- Scan barcode/QR (`html5-qrcode`, tetap client-side) untuk mempercepat input produk.
+- Cetak struk: halaman cetak EJS terpisah (mis. `GET /pos/transaksi/:id/struk`) dengan layout khusus print, header/footer sesuai Pengaturan.
+
+### 5.5 Order Online
+
+- Halaman katalog publik (`GET /katalog`) **tanpa perlu login** — menampilkan produk & branding toko.
+- Template pesan WhatsApp khusus order online, terpisah dari template POS.
+- (Perlu klarifikasi lanjut — lihat §9 — apakah order online langsung masuk sebagai transaksi atau perlu approval Admin.)
+
+### 5.6 Manajemen Produk & Kategori
+
+- CRUD Produk (`GET/POST/PUT/DELETE /produk`): SKU, nama, kategori, foto (upload lewat `multer`, simpan di folder lokal/objek storage), satuan, harga beli, harga jual, stok, stok minimum, status.
+- Update stok inline (`PATCH /produk/:id/stok-inline`) tanpa reload halaman penuh (AJAX ke Express endpoint JSON).
+- CRUD Kategori (`GET/POST/PUT/DELETE /kategori`).
+- Alert stok minimum: badge/notifikasi di dashboard & halaman produk saat stok ≤ `MinimumStok`.
+
+### 5.7 Stok Opname
+
+- Catat hasil opname (`POST /stok-opname`): stok sistem vs stok fisik, hitung selisih, catatan.
+- Update stok produk otomatis, dalam satu transaksi DB.
+- Riwayat opname (`GET /stok-opname`), hapus (`DELETE /stok-opname/:id`).
+
+### 5.8 Master Data Pendukung
+
+- **Supplier** (khusus Admin): CRUD (`/supplier`).
+- **Forwarder** (khusus Admin): CRUD (`/forwarder`).
+- **Pelanggan**: CRUD (`/pelanggan`); data default "Pelanggan Umum" di-seed saat migrasi awal.
+
+### 5.9 Pengaturan (Khusus Admin)
+
+- Nama & sub-judul aplikasi, logo (upload file).
+- Header/footer struk kasir.
+- Konfigurasi WhatsApp Gateway API (URL, API key — **disimpan terenkripsi** atau minimal tidak tampil penuh di UI setelah tersimpan) dan template pesan (POS & Order Online).
+- Pengiriman WhatsApp (`POST /whatsapp/send`) lewat `fetch`/`axios` ke gateway eksternal, menggantikan `UrlFetchApp`.
+
+### 5.10 Manajemen User (Khusus Admin)
+
+- List user (`GET /users`), tambah/ubah (`POST/PUT /users`) — set role, status aktif/nonaktif, reset password (hash ulang via bcrypt).
+
+### 5.11 Audit Log
+
+- Middleware/helper `logAction(username, action, details)` menulis ke tabel `audit_log` pada setiap operasi tulis penting.
+- Halaman lihat log (khusus Admin), dengan filter tanggal/aksi/user.
+
+### 5.12 Laporan
+
+- Halaman laporan (`GET /laporan`) — agregasi penjualan, stok, dan PO dilakukan lewat **query SQL di backend** (menggantikan agregasi client-side pada sistem lama), lalu dirender ke EJS + Chart.js.
+
+### 5.13 PWA & Aksesibilitas Mobile
+
+- Manifest (`GET /manifest.webmanifest`) dan service worker (`GET /sw.js`) disajikan sebagai route Express statis/dinamis, agar aplikasi tetap installable seperti versi GAS.
+- UI responsif Bootstrap 5 (grid + utilities), sidebar collapsible untuk layar kecil.
+
+## 6. Model Data (Skema Target — Relasional)
+
+14 entitas dipetakan menjadi tabel relasional dengan foreign key (bukan lagi sheet lepas seperti Google Sheets):
+
+| Tabel               | Keterangan Relasi                 |
+| ------------------- | --------------------------------- |
+| `users`             | Independen                        |
+| `produk`            | FK ke `kategori`                  |
+| `stok_opname`       | FK ke `produk`                    |
+| `kategori`          | Independen                        |
+| `supplier`          | Independen                        |
+| `forwarder`         | Independen                        |
+| `pelanggan`         | Independen                        |
+| `po_import`         | FK ke `supplier`                  |
+| `po_detail`         | FK ke `po_import`, FK ke `produk` |
+| `po_status_history` | FK ke `po_import`                 |
+| `transaksi`         | FK ke `pelanggan`                 |
+| `transaksi_detail`  | FK ke `transaksi`, FK ke `produk` |
+| `audit_log`         | FK ke `users` (username)          |
+| `settings`          | Independen (key-value)            |
+
+Skema DDL dibuat sekali (mis. via migration file Knex/Prisma) dan kompatibel dijalankan baik ke SQLite (dev) maupun PostgreSQL (produksi).
+
+## 7. Requirement Non-Fungsional
+
+- **Keamanan**: password hash `bcrypt` (naik level dari SHA-256), rate limiting login, middleware auth & role-check di setiap route, validasi & sanitasi input (mis. `express-validator`), proteksi terhadap SQL injection lewat parameterized query/ORM, HTTPS wajib di produksi (reverse proxy Nginx + Let's Encrypt di Ubuntu).
+- **Konkurensi**: operasi tulis kritikal (PO, transaksi, stok opname) dibungkus **database transaction** (`BEGIN...COMMIT`/`ROLLBACK`) sebagai pengganti `LockService`, memastikan konsistensi stok saat banyak kasir bekerja bersamaan.
+- **Deployment**: dijalankan sebagai service Node.js di Ubuntu (mis. via `pm2` atau `systemd`), di belakang reverse proxy Nginx; PostgreSQL sebagai database produksi dengan backup berkala (`pg_dump` terjadwal).
+- **Auditabilitas**: seluruh operasi tulis penting tercatat di `audit_log`.
+- **Localization**: UI & pesan sistem tetap berbahasa Indonesia; timezone `Asia/Jakarta` (diset di level aplikasi/DB, bukan lagi `Session.getScriptTimeZone()`).
+
+## 8. Perbaikan dari Sistem Lama (yang dibawa dalam migrasi ini)
+
+- Password hashing naik dari SHA-256 murni ke **bcrypt** (built-in salt, tahan brute-force).
+- Database relasional (SQLite/PostgreSQL) menggantikan Google Sheets — performa & concurrency lebih baik untuk volume transaksi tinggi.
+- Agregasi laporan dipindah ke query SQL di backend, bukan diproses di client — lebih cepat & konsisten.
+- Konfigurasi sensitif (API key WhatsApp) disimpan di tabel `settings` dengan akses terbatas Admin, idealnya di-mask di tampilan setelah tersimpan.
+
+## 9. Asumsi & Hal yang Perlu Klarifikasi
+
+- Detail perhitungan & tampilan pada modul **Laporan** perlu didefinisikan ulang secara eksplisit (query SQL apa saja) — pada sistem lama logic-nya ada di client-side GAS dan belum sepenuhnya tergali.
+- Alur **Order Online** (katalog publik → jadi transaksi) belum jelas apakah otomatis masuk ke tabel `transaksi` atau perlu approval Admin dulu.
+- Pilihan ORM/query builder (Knex.js vs Prisma vs Sequelize) untuk mendukung dual-database perlu diputuskan sebelum development dimulai — rekomendasi awal: **Knex.js** karena ringan dan fleksibel untuk raw SQL bila diperlukan.
+- Strategi migrasi data historis dari Google Sheets (data eksisting) ke SQLite/PostgreSQL belum didefinisikan — perlu skrip migrasi satu kali (one-time ETL script).
+- Tidak ditemukan fitur multi-cabang/multi-toko pada sistem lama — diasumsikan tetap single-location pada versi migrasi ini kecuali dinyatakan lain.
+
+## 10. Struktur Proyek (Usulan)
+
+```
+scorip-pos/
+├── src/
+│   ├── config/          # koneksi DB (sqlite/postgres), env
+│   ├── middlewares/      # auth, role-check, rate-limit
+│   ├── routes/            # per modul (auth, po-import, pos, produk, dst.)
+│   ├── controllers/
+│   ├── services/          # business logic (perhitungan landed cost, dll.)
+│   ├── models/ atau db/    # query builder / ORM models
+│   └── views/              # EJS templates + partials
+│       ├── layouts/
+│       ├── partials/       # sidebar, navbar, dst.
+│       └── pages/
+├── public/                 # Bootstrap, Bootstrap Icons, JS client, gambar
+├── migrations/              # skema DB (Knex/Prisma)
+├── seeds/                    # data awal (admin user, kategori default, dll.)
+├── .env.example
+└── package.json
+```
+

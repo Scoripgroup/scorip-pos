@@ -1,0 +1,144 @@
+<!-- Laporan -->
+<div class="animate-fade-in-up">
+  <div class="page-header">
+    <div class="page-header-left">
+      <h2 class="page-title">Laporan</h2>
+      <span class="page-subtitle">Analisis penjualan, produk, dan stok</span>
+    </div>
+    <div class="page-header-actions">
+      <button class="btn btn-outline-secondary" onclick="window.print()"><i class="bi bi-printer"></i> Cetak</button>
+    </div>
+  </div>
+
+  <!-- Date Range -->
+  <div class="card mb-4">
+    <div class="card-body d-flex align-items-center gap-3 flex-wrap" style="padding:0.75rem 1.25rem;">
+      <span style="font-size:0.82rem;font-weight:550;color:var(--text-secondary);">Periode:</span>
+      <input type="date" class="form-control form-control-sm" style="width:auto;" value="2025-09-01">
+      <span style="font-size:0.82rem;color:var(--text-muted);">s/d</span>
+      <input type="date" class="form-control form-control-sm" style="width:auto;" value="2025-09-16">
+      <button class="btn btn-primary btn-sm"><i class="bi bi-funnel me-1"></i> Filter</button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <ul class="nav nav-tabs-custom mb-4" role="tablist">
+    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tabPenjualan">Penjualan</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabProduk">Produk</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabStok">Stok</a></li>
+  </ul>
+
+  <div class="tab-content">
+    <!-- Tab Penjualan -->
+    <div class="tab-pane fade show active" id="tabPenjualan">
+      <div class="row g-3 mb-4 stagger-children">
+        <div class="col-sm-6 col-lg-3">
+          <div class="stat-card h-100">
+            <div class="stat-card-icon success"><i class="bi bi-cash-stack"></i></div>
+            <div class="stat-card-info">
+              <div class="stat-card-label">Total Penjualan</div>
+              <div class="stat-card-value" style="font-size:1.2rem;">Rp 12,4jt</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <div class="stat-card h-100">
+            <div class="stat-card-icon primary"><i class="bi bi-receipt"></i></div>
+            <div class="stat-card-info">
+              <div class="stat-card-label">Total Transaksi</div>
+              <div class="stat-card-value">156</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <div class="stat-card h-100">
+            <div class="stat-card-icon info"><i class="bi bi-graph-up-arrow"></i></div>
+            <div class="stat-card-info">
+              <div class="stat-card-label">Rata-rata / Transaksi</div>
+              <div class="stat-card-value" style="font-size:1.2rem;">Rp 79rb</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <div class="stat-card h-100">
+            <div class="stat-card-icon accent"><i class="bi bi-percent"></i></div>
+            <div class="stat-card-info">
+              <div class="stat-card-label">Total Diskon</div>
+              <div class="stat-card-value" style="font-size:1.2rem;">Rp 165rb</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h6 class="card-header-title">Grafik Penjualan Harian</h6></div>
+        <div class="card-body"><canvas id="chartLapPenjualan" height="300"></canvas></div>
+      </div>
+
+      <!-- Tabel Transaksi -->
+      <div class="table-wrapper mt-3">
+        <div class="table-header"><h6 class="table-header-title">Detail Transaksi</h6></div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="text-nowrap" style="width:160px;">No. Transaksi</th>
+                <th class="text-nowrap" style="width:160px;">Tanggal</th>
+                <th>Pelanggan</th>
+                <th class="text-end text-nowrap" style="width:140px;">Total</th>
+                <th class="text-nowrap" style="width:130px;">Metode</th>
+                <th class="text-nowrap" style="width:110px;">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% transaksi.forEach(function(trx) { %>
+              <tr>
+                <td style="font-weight:550;font-size:0.82rem;" class="text-nowrap"><%= trx.no_transaksi %></td>
+                <td style="font-size:0.8rem;color:var(--text-secondary);" class="text-nowrap"><%= new Date(trx.tanggal).toLocaleDateString('id-ID', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) %></td>
+                <td style="font-size:0.82rem;"><%= trx.pelanggan %></td>
+                <td class="text-end text-money text-nowrap">Rp <%= trx.total.toLocaleString('id-ID') %></td>
+                <td style="font-size:0.82rem;" class="text-nowrap"><%= trx.metode_bayar %></td>
+                <td><span class="badge-status <%= trx.status %>"><%= trx.status %></span></td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Produk -->
+    <div class="tab-pane fade" id="tabProduk">
+      <div class="row g-3">
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header"><h6 class="card-header-title">Produk Terlaris</h6></div>
+            <div class="card-body"><canvas id="chartLapTerlaris" height="280"></canvas></div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header"><h6 class="card-header-title">Penjualan per Kategori</h6></div>
+            <div class="card-body"><canvas id="chartLapKategori" height="280"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Stok -->
+    <div class="tab-pane fade" id="tabStok">
+      <div class="alert-flash alert-info" style="margin-bottom:1rem;">
+        <i class="bi bi-info-circle-fill"></i>
+        <span>Laporan stok menampilkan ringkasan stok saat ini dan riwayat pergerakan.</span>
+      </div>
+      <div class="card">
+        <div class="card-header"><h6 class="card-header-title">Ringkasan Stok</h6></div>
+        <div class="card-body"><p class="text-muted text-center" style="padding:2rem;">Detail laporan stok akan tersedia setelah backend terintegrasi.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="/js/laporan.js"></script>
+<script>window.dashboardData = <%- JSON.stringify(data) %>;</script>

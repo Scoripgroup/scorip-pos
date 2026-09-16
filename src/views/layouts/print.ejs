@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title : 'Cetak' %></title>
+  <link rel="stylesheet" href="/css/print.css">
+</head>
+<body>
+  <div class="print-preview-wrapper">
+    <div class="print-actions no-print">
+      <button onclick="window.print()" class="btn btn-primary" style="font-family:'Inter',sans-serif;padding:0.5rem 1.5rem;font-size:0.88rem;font-weight:600;border:none;border-radius:8px;background:#4F46E5;color:#fff;cursor:pointer;">
+        <i class="bi bi-printer" style="margin-right:0.35rem;"></i> Cetak
+      </button>
+      <button onclick="window.close()" class="btn btn-outline-secondary" style="font-family:'Inter',sans-serif;padding:0.5rem 1.5rem;font-size:0.88rem;font-weight:500;border:1px solid #E2E8F0;border-radius:8px;background:#fff;color:#475569;cursor:pointer;">
+        Tutup
+      </button>
+    </div>
+
+    <%- body %>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+  <script>
+    // Auto-generate barcodes if barcode elements exist
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.barcode-svg').forEach(function(el) {
+        try {
+          JsBarcode(el, el.dataset.value, {
+            format: 'CODE128',
+            width: 1.5,
+            height: 40,
+            displayValue: false,
+            margin: 0
+          });
+        } catch(e) {
+          console.error('Barcode error:', e);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

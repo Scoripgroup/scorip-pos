@@ -1,0 +1,71 @@
+<!-- Form Stok Opname -->
+<div class="animate-fade-in-up">
+  <div class="page-header">
+    <div class="page-header-left">
+      <h2 class="page-title">Stok Opname Baru</h2>
+      <span class="page-subtitle">Catat hasil pengecekan stok fisik</span>
+    </div>
+    <div class="page-header-actions">
+      <a href="/stok-opname" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h6 class="card-header-title">Input Stok Opname</h6>
+      <button class="btn btn-outline-primary btn-sm" onclick="addOpnameRow()">
+        <i class="bi bi-plus-lg me-1"></i> Tambah Baris
+      </button>
+    </div>
+    <div class="card-body">
+      <form action="/stok-opname" method="POST" id="opnameForm">
+        <div class="table-responsive">
+          <table class="data-table" id="opnameTable">
+            <thead>
+              <tr>
+                <th style="width:250px;">Produk</th>
+                <th class="text-center" style="width:100px;">Stok Sistem</th>
+                <th class="text-center" style="width:120px;">Stok Fisik</th>
+                <th class="text-center" style="width:100px;">Selisih</th>
+                <th>Catatan</th>
+                <th style="width:50px;"></th>
+              </tr>
+            </thead>
+            <tbody id="opnameBody">
+              <tr class="opname-row">
+                <td>
+                  <select class="form-select form-select-sm" name="produk_id[]" onchange="loadStokSistem(this)" required>
+                    <option value="">Pilih Produk</option>
+                    <% produk.forEach(function(p) { %>
+                      <option value="<%= p.id %>" data-stok="<%= p.stok %>"><%= p.sku %> — <%= p.nama %></option>
+                    <% }); %>
+                  </select>
+                </td>
+                <td class="text-center stok-sistem" style="font-weight:600;color:var(--text-muted);">-</td>
+                <td>
+                  <input type="number" class="form-control form-control-sm text-center stok-fisik" name="stok_fisik[]" min="0" oninput="calcSelisih(this)" required>
+                </td>
+                <td class="text-center selisih" style="font-weight:700;">-</td>
+                <td>
+                  <input type="text" class="form-control form-control-sm" name="catatan[]" placeholder="Opsional">
+                </td>
+                <td>
+                  <button type="button" class="btn btn-ghost btn-icon btn-sm" onclick="removeOpnameRow(this)" title="Hapus baris">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="d-flex gap-2 mt-3">
+          <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> Simpan Opname</button>
+          <a href="/stok-opname" class="btn btn-outline-secondary">Batal</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="/js/stok-opname.js"></script>

@@ -1,0 +1,84 @@
+<!-- PO Import List -->
+<div class="animate-fade-in-up">
+  <div class="page-header">
+    <div class="page-header-left">
+      <h2 class="page-title">PO Import</h2>
+      <span class="page-subtitle">Daftar Purchase Order import barang</span>
+    </div>
+    <div class="page-header-actions">
+      <a href="/po-import/baru" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Buat PO</a>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <div class="table-header">
+      <div class="table-actions w-100 d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-2 flex-wrap flex-grow-1">
+          <div class="table-search" style="min-width: 240px; max-width: 360px; width: 100%;">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Cari No. PO / Supplier..." style="width: 100%;">
+          </div>
+          <select class="form-select form-select-sm" style="width:auto;min-width:140px;font-size:0.82rem;">
+            <option value="">Semua Status</option>
+            <option>Draft</option>
+            <option>Dikirim ke Supplier</option>
+            <option>Dalam Perjalanan</option>
+            <option>Diterima</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th class="text-nowrap" style="width:140px;">No. PO</th>
+            <th class="text-nowrap" style="width:130px;">Tanggal</th>
+            <th>Supplier</th>
+            <% if (typeof canSeeCost !== 'undefined' && canSeeCost) { %>
+            <th class="text-end text-nowrap" style="width:130px;">Total RMB</th>
+            <th class="text-end text-nowrap" style="width:140px;">Total IDR</th>
+            <th class="text-end text-nowrap" style="width:150px;">Landed Cost</th>
+            <% } %>
+            <th class="text-nowrap" style="width:130px;">Status</th>
+            <th class="text-end text-nowrap" style="width:120px;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% poList.forEach(function(po) { %>
+          <tr>
+            <td><a href="/po-import/<%= po.id %>" style="font-weight:600;font-size:0.82rem;"><%= po.no_po %></a></td>
+            <td style="font-size:0.8rem;color:var(--text-secondary);"><%= new Date(po.tanggal).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) %></td>
+            <td style="font-size:0.82rem;"><%= po.supplier %></td>
+            <% if (typeof canSeeCost !== 'undefined' && canSeeCost) { %>
+            <td class="text-end text-money" style="font-size:0.82rem;">¥ <%= po.total_rmb.toLocaleString('id-ID') %></td>
+            <td class="text-end text-money" style="font-size:0.82rem;">Rp <%= po.total_idr.toLocaleString('id-ID') %></td>
+            <td class="text-end text-money" style="font-size:0.82rem;font-weight:650;">Rp <%= po.landed_cost.toLocaleString('id-ID') %></td>
+            <% } %>
+            <td>
+              <% var statusClass = po.status === 'Diterima' ? 'diterima' : po.status === 'Dalam Perjalanan' ? 'dalam-perjalanan' : po.status === 'Draft' ? 'draft' : 'dikirim'; %>
+              <span class="badge-status <%= statusClass %>"><%= po.status %></span>
+            </td>
+            <td class="text-end">
+              <div class="d-flex justify-content-end gap-1">
+                <a href="/po-import/<%= po.id %>" class="btn btn-ghost btn-icon btn-sm" title="Detail"><i class="bi bi-eye"></i></a>
+                <a href="/po-import/<%= po.id %>/edit" class="btn btn-ghost btn-icon btn-sm" title="Edit"><i class="bi bi-pencil"></i></a>
+                <button class="btn btn-ghost btn-icon btn-sm" title="Hapus"
+                        data-bs-toggle="modal" data-bs-target="#deleteModal"
+                        data-name="<%= po.no_po %>" data-url="/po-import/<%= po.id %>">
+                  <i class="bi bi-trash3"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <span class="table-info">Menampilkan <%= poList.length %> PO</span>
+    </div>
+  </div>
+</div>

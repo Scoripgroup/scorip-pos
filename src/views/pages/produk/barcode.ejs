@@ -1,0 +1,10 @@
+<!-- Cetak Barcode -->
+<div class="barcode-grid">
+  <% produk.forEach(function(p) { %>
+    <div class="barcode-label">
+      <svg class="barcode-svg" data-value="<%= p.sku %>"></svg>
+      <div class="barcode-label-sku"><%= p.sku %></div>
+      <div class="barcode-label-name"><%= p.nama %></div>
+    </div>
+  <% }); %>
+</div>

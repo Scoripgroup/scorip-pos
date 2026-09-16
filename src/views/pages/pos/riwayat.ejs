@@ -1,0 +1,108 @@
+<!-- POS Riwayat Transaksi -->
+<div class="animate-fade-in-up">
+  <div class="page-header">
+    <div class="page-header-left">
+      <h2 class="page-title">Riwayat Transaksi</h2>
+      <span class="page-subtitle">Daftar seluruh transaksi penjualan</span>
+    </div>
+    <div class="page-header-actions">
+      <a href="/pos" class="btn btn-primary">
+        <i class="bi bi-cart3"></i> Buka Kasir
+      </a>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <div class="table-header">
+      <div class="table-actions">
+        <div class="table-search">
+          <i class="bi bi-search"></i>
+          <input type="text" placeholder="Cari transaksi..." id="searchTransaksi">
+        </div>
+        <select class="form-select form-select-sm" style="width:auto;font-size:0.82rem;">
+          <option value="">Semua Status</option>
+          <option value="selesai">Selesai</option>
+          <option value="diproses">Diproses</option>
+          <option value="dibatalkan">Dibatalkan</option>
+        </select>
+        <select class="form-select form-select-sm" style="width:auto;font-size:0.82rem;">
+          <option value="">Semua Metode</option>
+          <option value="Cash">Cash</option>
+          <option value="Transfer">Transfer</option>
+          <option value="QRIS">QRIS</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>No. Transaksi</th>
+            <th>Tanggal</th>
+            <th>Pelanggan</th>
+            <th>Total</th>
+            <th>Metode</th>
+            <th>Status</th>
+            <th>Resi</th>
+            <th style="width:120px;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% transaksi.forEach(function(trx) { %>
+          <tr>
+            <td>
+              <a href="/pos/transaksi/<%= trx.id %>" style="font-weight:600;font-size:0.82rem;">
+                <%= trx.no_transaksi %>
+              </a>
+            </td>
+            <td style="font-size:0.8rem;color:var(--text-secondary);">
+              <%= new Date(trx.tanggal).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) %>
+            </td>
+            <td style="font-size:0.82rem;"><%= trx.pelanggan %></td>
+            <td class="text-money" style="font-size:0.82rem;">Rp <%= trx.total.toLocaleString('id-ID') %></td>
+            <td>
+              <span style="font-size:0.78rem;font-weight:500;">
+                <% if (trx.metode_bayar === 'Cash') { %>
+                  <i class="bi bi-cash-stack text-success me-1"></i>
+                <% } else if (trx.metode_bayar === 'Transfer') { %>
+                  <i class="bi bi-bank text-info me-1"></i>
+                <% } else { %>
+                  <i class="bi bi-qr-code text-primary me-1"></i>
+                <% } %>
+                <%= trx.metode_bayar %>
+              </span>
+            </td>
+            <td>
+              <span class="badge-status <%= trx.status %>"><%= trx.status.charAt(0).toUpperCase() + trx.status.slice(1) %></span>
+            </td>
+            <td style="font-size:0.78rem;color:var(--text-muted);">
+              <%= trx.resi || '-' %>
+            </td>
+            <td>
+              <div class="d-flex gap-1">
+                <a href="/pos/transaksi/<%= trx.id %>" class="btn btn-ghost btn-icon btn-sm" title="Detail">
+                  <i class="bi bi-eye"></i>
+                </a>
+                <a href="/pos/transaksi/<%= trx.id %>/struk" class="btn btn-ghost btn-icon btn-sm" title="Cetak Struk" target="_blank">
+                  <i class="bi bi-printer"></i>
+                </a>
+                <button class="btn btn-ghost btn-icon btn-sm" title="Hapus"
+                        data-bs-toggle="modal" data-bs-target="#deleteModal"
+                        data-name="<%= trx.no_transaksi %>" data-url="/pos/transaksi/<%= trx.id %>">
+                  <i class="bi bi-trash3"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <span class="table-info">Menampilkan <%= transaksi.length %> transaksi</span>
+      <%- include('../../partials/pagination', { page: 1, pages: 1, url: '/pos/riwayat' }) %>
+    </div>
+  </div>
+</div>

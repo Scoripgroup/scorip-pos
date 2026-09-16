@@ -1,0 +1,180 @@
+<!-- Sidebar Navigation -->
+<aside class="sidebar" id="sidebar">
+  <!-- Brand -->
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-icon">
+      <i class="bi bi-shop"></i>
+    </div>
+    <div class="sidebar-brand-text">
+      <span class="sidebar-brand-name"><%= typeof settings !== 'undefined' ? settings.nama_aplikasi : 'SCORIP POS' %></span>
+      <span class="sidebar-brand-sub"><%= typeof settings !== 'undefined' ? settings.sub_judul : 'Sistem POS' %></span>
+    </div>
+  </div>
+
+  <!-- Menu -->
+  <ul class="sidebar-menu">
+    <li class="sidebar-menu-label">Menu Utama</li>
+
+    <li class="sidebar-menu-item">
+      <a href="/dashboard" class="sidebar-menu-link <%= activePage === 'dashboard' ? 'active' : '' %>">
+        <span class="menu-icon-box icon-dashboard"><i class="bi bi-grid-1x2-fill"></i></span>
+        <span>Dashboard</span>
+      </a>
+    </li>
+
+    <% if (typeof canAccess === 'undefined' || canAccess('pos')) { %>
+    <li class="sidebar-menu-item">
+      <a href="/pos" class="sidebar-menu-link <%= activePage === 'pos' ? 'active' : '' %>">
+        <span class="menu-icon-box icon-pos"><i class="bi bi-cart3"></i></span>
+        <span>POS Kasir</span>
+      </a>
+    </li>
+    <% } %>
+
+    <li class="sidebar-menu-item">
+      <a href="/katalog" class="sidebar-menu-link <%= activePage === 'katalog' ? 'active' : '' %>" target="_blank">
+        <span class="menu-icon-box icon-katalog"><i class="bi bi-globe2"></i></span>
+        <span>Order Online</span>
+      </a>
+    </li>
+
+    <% if (typeof canAccess === 'undefined' || canAccess('produk') || canAccess('kategori') || canAccess('stok_opname')) { %>
+    <li class="sidebar-menu-label">Inventaris</li>
+
+    <% if (typeof canAccess === 'undefined' || canAccess('produk')) { %>
+    <li class="sidebar-menu-item">
+      <a href="/produk" class="sidebar-menu-link <%= activePage === 'produk' ? 'active' : '' %>">
+        <span class="menu-icon-box icon-produk"><i class="bi bi-box-seam-fill"></i></span>
+        <span>Produk</span>
+        <% if (typeof stokAlertCount !== 'undefined' && stokAlertCount > 0) { %>
+          <span class="sidebar-menu-badge"><%= stokAlertCount %></span>
+        <% } %>
+      </a>
+    </li>
+    <% } %>
+
+    <% if (typeof canAccess === 'undefined' || canAccess('kategori')) { %>
+    <li class="sidebar-menu-item">
+      <a href="/kategori" class="sidebar-menu-link <%= activePage === 'kategori' ? 'active' : '' %>">
+        <span class="menu-icon-box icon-kategori"><i class="bi bi-tags-fill"></i></span>
+        <span>Kategori</span>
+      </a>
+    </li>
+    <% } %>
+
+    <% if (typeof canAccess === 'undefined' || canAccess('stok_opname')) { %>
+    <li class="sidebar-menu-item">
+      <a href="/stok-opname" class="sidebar-menu-link <%= activePage === 'stok-opname' ? 'active' : '' %>">
+        <span class="menu-icon-box icon-stok"><i class="bi bi-clipboard2-check-fill"></i></span>
+        <span>Stok Opname</span>
+      </a>
+    </li>
+    <% } %>
+    <% } %>
+
+    <% if (typeof canAccess === 'undefined' || canAccess('po_import') || canAccess('supplier') || canAccess('forwarder')) { %>
+    <li class="sidebar-menu-label">Pengadaan</li>
+
+    <% if (typeof canAccess === 'undefined' || canAccess('po_import')) { %>
+    <li class="sidebar-menu-item">
+      <a href="/po-import" class="sidebar-menu-link <%= activePage === 'po-import' ? 'active' : '' %>">
+        <span class="menu-icon-box icon-po"><i class="bi bi-truck"></i></span>
+        <span>PO Import</span>
+      </a>
+    </li>
+    <% } %>
+
+    <% if (typeof canAccess === 'undefined' || canAccess('supplier')) { %>
+    <li class="sidebar-menu-item">
+      <a href="/supplier" class="sidebar-menu-link <%= activePage === 'supplier' ? 'active' : '' %>">
+        <span class="menu-icon-box icon-supplier"><i class="bi bi-building"></i></span>
+        <span>Supplier</span>
+      </a>
+    </li>
+    <% } %>
+
+    <% if (typeof canAccess === 'undefined' || canAccess('forwarder')) { %>
+    <li class="sidebar-menu-item">
+      <a href="/forwarder" class="sidebar-menu-link <%= activePage === 'forwarder' ? 'active' : '' %>">
+        <span class="menu-icon-box icon-forwarder"><i class="bi bi-airplane-fill"></i></span>
+        <span>Forwarder</span>
+      </a>
+    </li>
+    <% } %>
+    <% } %>
+
+    <% if (typeof canAccess === 'undefined' || canAccess('pelanggan') || canAccess('laporan')) { %>
+    <li class="sidebar-menu-label">Data & Analisis</li>
+
+    <% if (typeof canAccess === 'undefined' || canAccess('pelanggan')) { %>
+    <li class="sidebar-menu-item">
+      <a href="/pelanggan" class="sidebar-menu-link <%= activePage === 'pelanggan' ? 'active' : '' %>">
+        <span class="menu-icon-box icon-pelanggan"><i class="bi bi-people-fill"></i></span>
+        <span>Pelanggan</span>
+      </a>
+    </li>
+    <% } %>
+
+    <% if (typeof canAccess === 'undefined' || canAccess('laporan')) { %>
+    <li class="sidebar-menu-item">
+      <a href="/laporan" class="sidebar-menu-link <%= activePage === 'laporan' ? 'active' : '' %>">
+        <span class="menu-icon-box icon-laporan"><i class="bi bi-bar-chart-fill"></i></span>
+        <span>Laporan</span>
+      </a>
+    </li>
+    <% } %>
+    <% } %>
+
+    <% if (typeof user !== 'undefined' && user && (user.role === 'Admin' || (typeof canAccess !== 'undefined' && canAccess('audit_log')))) { %>
+    <li class="sidebar-menu-label">Administrasi</li>
+
+    <% if (typeof canAccess === 'undefined' || canAccess('audit_log')) { %>
+    <li class="sidebar-menu-item">
+      <a href="/audit-log" class="sidebar-menu-link <%= activePage === 'audit-log' ? 'active' : '' %>">
+        <span class="menu-icon-box icon-audit"><i class="bi bi-journal-text"></i></span>
+        <span>Audit Log</span>
+      </a>
+    </li>
+    <% } %>
+
+    <% if (typeof user !== 'undefined' && user && user.role === 'Admin') { %>
+    <li class="sidebar-menu-item">
+      <a href="/pengaturan" class="sidebar-menu-link <%= activePage === 'pengaturan' && (typeof activeTab === 'undefined' || activeTab === 'umum') ? 'active' : '' %>">
+        <span class="menu-icon-box icon-pengaturan"><i class="bi bi-gear-fill"></i></span>
+        <span>Pengaturan</span>
+      </a>
+    </li>
+
+    <li class="sidebar-menu-item">
+      <a href="/pengaturan?tab=hak-akses" class="sidebar-menu-link <%= activePage === 'pengaturan' && typeof activeTab !== 'undefined' && activeTab === 'hak-akses' ? 'active' : '' %>">
+        <span class="menu-icon-box icon-hak-akses"><i class="bi bi-shield-lock-fill"></i></span>
+        <span>Hak Akses & Role</span>
+      </a>
+    </li>
+
+    <li class="sidebar-menu-item">
+      <a href="/pengaturan?tab=pengguna" class="sidebar-menu-link <%= (activePage === 'users' || (activePage === 'pengaturan' && typeof activeTab !== 'undefined' && activeTab === 'pengguna')) ? 'active' : '' %>">
+        <span class="menu-icon-box icon-users"><i class="bi bi-person-gear"></i></span>
+        <span>Manajemen User</span>
+      </a>
+    </li>
+    <% } %>
+    <% } %>
+  </ul>
+
+  <!-- Sidebar Footer (User) -->
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar">
+        <%= (typeof user !== 'undefined' && user && user.nama) ? user.nama.charAt(0).toUpperCase() : 'U' %>
+      </div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name"><%= (typeof user !== 'undefined' && user && user.nama) ? user.nama : 'User' %></div>
+        <div class="sidebar-user-role"><%= (typeof user !== 'undefined' && user && user.role) ? user.role : '' %></div>
+      </div>
+      <a href="/logout" class="sidebar-user-logout" title="Logout">
+        <i class="bi bi-box-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+</aside>

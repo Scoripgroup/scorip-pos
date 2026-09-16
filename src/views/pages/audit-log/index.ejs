@@ -1,0 +1,76 @@
+<!-- Audit Log -->
+<div class="animate-fade-in-up">
+  <div class="page-header">
+    <div class="page-header-left">
+      <h2 class="page-title">Audit Log</h2>
+      <span class="page-subtitle">Riwayat aktivitas sistem</span>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <div class="table-header">
+      <div class="table-actions">
+        <div class="table-search">
+          <i class="bi bi-search"></i>
+          <input type="text" placeholder="Cari log...">
+        </div>
+        <select class="form-select form-select-sm" style="width:auto;font-size:0.82rem;">
+          <option value="">Semua Aksi</option>
+          <option>CREATE_TRANSAKSI</option>
+          <option>UPDATE_PRODUK</option>
+          <option>CREATE_PO</option>
+          <option>UPDATE_PO_STATUS</option>
+          <option>STOK_OPNAME</option>
+        </select>
+        <select class="form-select form-select-sm" style="width:auto;font-size:0.82rem;">
+          <option value="">Semua User</option>
+          <option>admin</option>
+          <option>kasir1</option>
+        </select>
+        <input type="date" class="form-control form-control-sm" style="width:auto;font-size:0.82rem;">
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width:180px;">Timestamp</th>
+            <th style="width:100px;">User</th>
+            <th style="width:180px;">Aksi</th>
+            <th>Detail</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% logs.forEach(function(log) { %>
+          <tr>
+            <td style="font-size:0.78rem;color:var(--text-secondary);font-family:var(--font-mono);">
+              <%= new Date(log.timestamp).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit' }) %>
+            </td>
+            <td>
+              <div class="d-flex align-items-center gap-1">
+                <div class="avatar-sm" style="width:22px;height:22px;font-size:0.55rem;"><%= log.username.charAt(0).toUpperCase() %></div>
+                <span style="font-size:0.82rem;font-weight:500;"><%= log.username %></span>
+              </div>
+            </td>
+            <td>
+              <%
+                var aksiColor = log.aksi.startsWith('CREATE') ? 'success' : log.aksi.startsWith('UPDATE') ? 'info' : log.aksi.startsWith('DELETE') ? 'danger' : 'warning';
+              %>
+              <span style="background:var(--<%= aksiColor %>-bg);color:var(--<%= aksiColor %>-text);padding:0.15rem 0.5rem;border-radius:var(--radius-full);font-size:0.7rem;font-weight:600;font-family:var(--font-mono);">
+                <%= log.aksi %>
+              </span>
+            </td>
+            <td style="font-size:0.82rem;color:var(--text-secondary);"><%= log.detail %></td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <span class="table-info">Menampilkan <%= logs.length %> log</span>
+      <%- include('../../partials/pagination', { page: 1, pages: 1, url: '/audit-log' }) %>
+    </div>
+  </div>
+</div>

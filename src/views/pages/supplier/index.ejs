@@ -1,0 +1,93 @@
+<!-- Manajemen Supplier -->
+<div class="animate-fade-in-up">
+  <div class="page-header">
+    <div class="page-header-left">
+      <h2 class="page-title">Manajemen Supplier</h2>
+      <span class="page-subtitle"><%= supplier.length %> supplier terdaftar</span>
+    </div>
+    <div class="page-header-actions">
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#supplierModal" onclick="resetSupplierForm()">
+        <i class="bi bi-plus-lg"></i> Tambah Supplier
+      </button>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th class="text-nowrap" style="width:60px;">#</th>
+            <th style="min-width:180px;">Nama Supplier</th>
+            <th class="text-nowrap" style="width:160px;">Kontak</th>
+            <th class="text-nowrap" style="width:200px;">Email</th>
+            <th>Alamat</th>
+            <th class="text-end text-nowrap" style="width:110px;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% supplier.forEach(function(s, i) { %>
+          <tr>
+            <td style="color:var(--text-muted);"><%= i + 1 %></td>
+            <td style="font-weight:550;"><i class="bi bi-building me-2" style="color:var(--primary);"></i><%= s.nama %></td>
+            <td class="text-nowrap" style="font-size:0.82rem;"><%= s.kontak %></td>
+            <td class="text-nowrap" style="font-size:0.82rem;color:var(--text-secondary);"><%= s.email %></td>
+            <td style="font-size:0.82rem;color:var(--text-secondary);"><%= s.alamat %></td>
+            <td class="text-end">
+              <div class="d-flex justify-content-end gap-1">
+                <button class="btn btn-ghost btn-icon btn-sm" title="Edit" data-bs-toggle="modal" data-bs-target="#supplierModal" onclick="editSupplier(<%= JSON.stringify(s).replace(/"/g, '&quot;') %>)"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-ghost btn-icon btn-sm" title="Hapus" data-bs-toggle="modal" data-bs-target="#deleteModal" data-name="<%= s.nama %>" data-url="/supplier/<%= s.id %>"><i class="bi bi-trash3"></i></button>
+              </div>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Supplier Modal -->
+<div class="modal fade" id="supplierModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="supplierModalTitle">Tambah Supplier</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="/supplier" method="POST" id="supplierForm">
+        <input type="hidden" name="_method" id="supplierMethod" value="POST">
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-12"><label class="form-label">Nama <span class="text-danger">*</span></label><input type="text" class="form-control" name="nama" id="sNama" required></div>
+            <div class="col-md-6"><label class="form-label">Kontak</label><input type="text" class="form-control" name="kontak" id="sKontak" placeholder="+86 xxx"></div>
+            <div class="col-md-6"><label class="form-label">Email</label><input type="email" class="form-control" name="email" id="sEmail"></div>
+            <div class="col-12"><label class="form-label">Alamat</label><textarea class="form-control" name="alamat" id="sAlamat" rows="2"></textarea></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-check-lg me-1"></i> Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function resetSupplierForm() {
+  document.getElementById('supplierModalTitle').textContent = 'Tambah Supplier';
+  document.getElementById('supplierForm').action = '/supplier';
+  document.getElementById('supplierMethod').value = 'POST';
+  ['sNama','sKontak','sEmail','sAlamat'].forEach(id => document.getElementById(id).value = '');
+}
+function editSupplier(s) {
+  document.getElementById('supplierModalTitle').textContent = 'Edit Supplier';
+  document.getElementById('supplierForm').action = '/supplier/' + s.id;
+  document.getElementById('supplierMethod').value = 'PUT';
+  document.getElementById('sNama').value = s.nama;
+  document.getElementById('sKontak').value = s.kontak || '';
+  document.getElementById('sEmail').value = s.email || '';
+  document.getElementById('sAlamat').value = s.alamat || '';
+}
+</script>

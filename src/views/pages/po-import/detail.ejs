@@ -1,0 +1,169 @@
+<!-- Detail PO Import -->
+<div class="animate-fade-in-up">
+  <div class="page-header">
+    <div class="page-header-left">
+      <h2 class="page-title">Detail PO Import</h2>
+      <span class="page-subtitle"><%= po.no_po %></span>
+    </div>
+    <div class="page-header-actions">
+      <a href="/po-import/<%= po.id %>/edit" class="btn btn-outline-primary"><i class="bi bi-pencil"></i> Edit</a>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#statusModal">
+        <i class="bi bi-arrow-repeat"></i> Update Status
+      </button>
+      <a href="/po-import" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Info PO -->
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header">
+          <h6 class="card-header-title">Informasi PO</h6>
+          <% var statusClass = po.status === 'Diterima' ? 'diterima' : po.status === 'Dalam Perjalanan' ? 'dalam-perjalanan' : po.status === 'Draft' ? 'draft' : 'dikirim'; %>
+          <span class="badge-status <%= statusClass %>"><%= po.status %></span>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="text-muted" style="font-size:0.72rem;display:block;">No. PO</label>
+            <span style="font-weight:600;font-size:0.88rem;"><%= po.no_po %></span>
+          </div>
+          <div class="mb-3">
+            <label class="text-muted" style="font-size:0.72rem;display:block;">Tanggal</label>
+            <span style="font-size:0.85rem;"><%= new Date(po.tanggal).toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric' }) %></span>
+          </div>
+          <div class="mb-3">
+            <label class="text-muted" style="font-size:0.72rem;display:block;">Supplier</label>
+            <span style="font-size:0.85rem;"><%= po.supplier %></span>
+          </div>
+          <div class="mb-3">
+            <label class="text-muted" style="font-size:0.72rem;display:block;">Forwarder</label>
+            <span style="font-size:0.85rem;"><%= po.forwarder || '-' %></span>
+          </div>
+          <div class="mb-3">
+            <label class="text-muted" style="font-size:0.72rem;display:block;">Kurs RMB</label>
+            <span style="font-size:0.85rem;font-family:var(--font-mono);">Rp <%= po.kurs_rmb.toLocaleString('id-ID') %></span>
+          </div>
+          <hr style="border-color:var(--border-light);">
+          <div class="mb-2">
+            <label class="text-muted" style="font-size:0.72rem;display:block;">Total RMB</label>
+            <span class="text-money">¥ <%= po.total_rmb.toLocaleString('id-ID') %></span>
+          </div>
+          <div class="mb-2">
+            <label class="text-muted" style="font-size:0.72rem;display:block;">Total Barang (IDR)</label>
+            <span class="text-money">Rp <%= po.total_idr.toLocaleString('id-ID') %></span>
+          </div>
+          <div class="mb-2">
+            <label class="text-muted" style="font-size:0.72rem;display:block;">Biaya Forwarder</label>
+            <span class="text-money">Rp <%= po.biaya_forwarder.toLocaleString('id-ID') %></span>
+          </div>
+          <div class="mb-2">
+            <label class="text-muted" style="font-size:0.72rem;display:block;">Ongkir Lokal</label>
+            <span class="text-money">Rp <%= po.ongkir_lokal.toLocaleString('id-ID') %></span>
+          </div>
+          <hr style="border-color:var(--border-color);">
+          <div>
+            <label class="text-muted" style="font-size:0.72rem;display:block;">Total Landed Cost</label>
+            <span class="text-money" style="font-size:1.25rem;font-weight:800;color:var(--primary);">Rp <%= po.landed_cost.toLocaleString('id-ID') %></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status Timeline -->
+      <div class="card mt-3">
+        <div class="card-header"><h6 class="card-header-title"><i class="bi bi-clock-history me-2"></i>Riwayat Status</h6></div>
+        <div class="card-body">
+          <div class="timeline">
+            <% const histList = (typeof statusHistory !== 'undefined' && statusHistory) ? statusHistory : (typeof history !== 'undefined' ? history : []); %>
+            <% if (histList.length === 0) { %>
+              <div class="text-muted text-center py-2" style="font-size:0.8rem;">Belum ada riwayat status</div>
+            <% } %>
+            <% histList.forEach(function(s) { %>
+            <div class="timeline-item">
+              <div class="timeline-item-time"><%= new Date(s.tanggal).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) %></div>
+              <div class="timeline-item-title"><%= s.status %></div>
+              <% if (s.catatan) { %>
+              <div class="timeline-item-desc"><%= s.catatan %></div>
+              <% } %>
+            </div>
+            <% }); %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail Items -->
+    <div class="col-lg-8 col-xl-8">
+      <div class="table-wrapper">
+        <div class="table-header"><h6 class="table-header-title">Detail Item (<%= (typeof detail !== 'undefined' ? detail : (typeof items !== 'undefined' ? items : [])).length %> item)</h6></div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Produk</th>
+                <th class="text-center text-nowrap" style="width:80px;">Qty</th>
+                <th class="text-end text-nowrap" style="width:120px;">Harga RMB</th>
+                <th class="text-center text-nowrap" style="width:90px;">Koli</th>
+                <th class="text-end text-nowrap" style="width:130px;">Total RMB</th>
+                <th class="text-end text-nowrap" style="width:140px;">Est. IDR</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% const itemList = (typeof detail !== 'undefined' && detail) ? detail : (typeof items !== 'undefined' ? items : []); %>
+              <% itemList.forEach(function(item) { %>
+              <tr>
+                <td style="font-weight:550;"><%= item.nama_produk %></td>
+                <td class="text-center text-nowrap"><%= item.qty %></td>
+                <td class="text-end text-money text-nowrap">¥ <%= item.harga_rmb %></td>
+                <td class="text-center text-nowrap"><%= item.jumlah_koli %></td>
+                <% const subtotal = item.subtotal_rmb !== undefined ? item.subtotal_rmb : ((item.qty || 0) * (item.harga_rmb || 0)); %>
+                <td class="text-end text-money text-nowrap">¥ <%= subtotal.toLocaleString('id-ID') %></td>
+                <td class="text-end text-money text-nowrap" style="color:var(--text-secondary);">Rp <%= (subtotal * (po.kurs_rmb || 1)).toLocaleString('id-ID') %></td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Status Update Modal -->
+<div class="modal fade" id="statusModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Update Status PO</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Status Baru</label>
+          <select class="form-select" id="newStatus">
+            <option>Draft</option>
+            <option>Dikirim ke Supplier</option>
+            <option>Dalam Perjalanan</option>
+            <option>Sampai Forwarder</option>
+            <option>Dalam Pengiriman Lokal</option>
+            <option>Diterima</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">No. Resi (opsional)</label>
+          <input type="text" class="form-control" placeholder="Masukkan no. resi jika ada">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Catatan</label>
+          <textarea class="form-control" rows="2" placeholder="Catatan tambahan"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-primary btn-sm" onclick="alert('Update status — backend belum tersedia'); bootstrap.Modal.getInstance(document.getElementById('statusModal')).hide();">
+          <i class="bi bi-check-lg me-1"></i> Update
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

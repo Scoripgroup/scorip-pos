@@ -1,0 +1,202 @@
+<!-- POS Kasir Page -->
+<div class="pos-layout animate-fade-in">
+  <!-- Panel Kiri: Produk -->
+  <div class="pos-products">
+    <!-- Search & Scan -->
+    <div class="pos-products-header">
+      <div class="pos-search">
+        <i class="bi bi-search"></i>
+        <input type="text" id="posSearch" placeholder="Cari produk (nama, SKU)... atau tekan F2" autocomplete="off">
+      </div>
+      <button class="pos-scan-btn" id="posScanBtn" title="Scan Barcode">
+        <i class="bi bi-upc-scan"></i>
+      </button>
+    </div>
+
+    <!-- Category Filter -->
+    <div class="pos-categories">
+      <button class="pos-category-btn active" data-category="all">Semua</button>
+      <% kategori.forEach(function(kat) { %>
+        <button class="pos-category-btn" data-category="<%= kat.id %>"><%= kat.nama %></button>
+      <% }); %>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="pos-product-grid" id="posProductGrid">
+      <% produk.forEach(function(p) { %>
+        <div class="pos-product-card <%= p.stok <= 0 ? 'out-of-stock' : '' %>"
+             data-id="<%= p.id %>"
+             data-nama="<%= p.nama %>"
+             data-sku="<%= p.sku %>"
+             data-harga="<%= p.harga_jual %>"
+             data-stok="<%= p.stok %>"
+             data-kategori="<%= p.kategori_id %>"
+             onclick="addToCart(this)">
+          <div class="pos-product-img">
+            <% if (p.foto) { %>
+              <img src="<%= p.foto %>" alt="<%= p.nama %>" loading="lazy" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
+            <% } %>
+            <div class="pos-img-placeholder" style="<%= p.foto ? 'display:none;' : '' %>">
+              <i class="bi <%= p.kategori_id === 1 ? 'bi-headphones' : p.kategori_id === 2 ? 'bi-handbag' : p.kategori_id === 3 ? 'bi-phone' : p.kategori_id === 4 ? 'bi-smartwatch' : 'bi-box-seam' %>"></i>
+              <span class="placeholder-sku"><%= p.sku %></span>
+            </div>
+            <% if (p.stok > 0 && p.stok <= (p.stok_minimum || 5)) { %>
+              <span class="pos-stock-badge">Sisa <%= p.stok %></span>
+            <% } %>
+          </div>
+          <div class="pos-product-name" title="<%= p.nama %>"><%= p.nama %></div>
+          <div class="pos-product-price">Rp <%= p.harga_jual.toLocaleString('id-ID') %></div>
+          <div class="pos-product-stock <%= p.stok <= (p.stok_minimum || 5) ? 'low' : '' %>">
+            <span class="stock-dot"></span>Stok: <%= p.stok %>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+
+  <!-- Panel Kanan: Keranjang -->
+  <div class="pos-cart">
+    <div class="pos-cart-header">
+      <div class="pos-cart-title">
+        <i class="bi bi-cart3"></i>
+        Keranjang
+        <span class="pos-cart-count" id="cartCount">0</span>
+      </div>
+      <a href="/pos/riwayat" class="btn btn-ghost btn-sm" title="Riwayat">
+        <i class="bi bi-clock-history"></i>
+      </a>
+    </div>
+
+    <!-- Customer Select -->
+    <div class="pos-customer-select">
+      <select id="posCustomer">
+        <% pelanggan.forEach(function(p) { %>
+          <option value="<%= p.id %>" <%= p.id === 1 ? 'selected' : '' %>><%= p.nama %></option>
+        <% }); %>
+      </select>
+    </div>
+
+    <!-- Cart Items -->
+    <div class="pos-cart-items" id="cartItems">
+      <div class="pos-cart-empty" id="cartEmpty">
+        <i class="bi bi-cart-x"></i>
+        <span>Keranjang masih kosong</span>
+        <span style="font-size:0.72rem;color:var(--text-light);">Klik produk untuk menambahkan</span>
+      </div>
+    </div>
+
+    <!-- Cart Summary -->
+    <div class="pos-cart-summary">
+      <div class="pos-summary-row">
+        <span class="pos-summary-label">Subtotal</span>
+        <span class="pos-summary-value" id="cartSubtotal">Rp 0</span>
+      </div>
+      <div class="pos-summary-row">
+        <span class="pos-summary-label">
+          Diskon
+          <input type="number" id="cartDiscount" value="0" min="0"
+                 style="width:70px;padding:0.2rem 0.35rem;border:1px solid var(--border-color);border-radius:var(--radius-sm);font-size:0.78rem;text-align:right;margin-left:0.5rem;font-family:var(--font-sans);">
+        </span>
+        <span class="pos-summary-value text-danger" id="cartDiscountDisplay">- Rp 0</span>
+      </div>
+      <div class="pos-summary-row total">
+        <span class="pos-summary-label">Total</span>
+        <span class="pos-summary-value" id="cartTotal">Rp 0</span>
+      </div>
+    </div>
+
+    <!-- Cart Actions -->
+    <div class="pos-cart-actions">
+      <button class="pos-pay-btn" id="posPayBtn" disabled onclick="openPaymentModal()">
+        <i class="bi bi-wallet2"></i>
+        Bayar — <span id="payBtnTotal">Rp 0</span>
+      </button>
+      <div class="pos-secondary-actions">
+        <button class="pos-secondary-btn" onclick="holdCart()">
+          <i class="bi bi-pause-circle"></i> Tahan
+        </button>
+        <button class="pos-secondary-btn danger" onclick="clearCart()">
+          <i class="bi bi-trash3"></i> Kosongkan
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-wallet2 me-2"></i>Pembayaran</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="payment-modal-body">
+        <!-- Payment Method -->
+        <div class="payment-method-group">
+          <button class="payment-method-btn active" data-method="Cash" onclick="selectPaymentMethod(this)">
+            <div class="payment-method-icon"><i class="bi bi-cash-stack"></i></div>
+            <div class="payment-method-name">Cash</div>
+          </button>
+          <button class="payment-method-btn" data-method="Transfer" onclick="selectPaymentMethod(this)">
+            <div class="payment-method-icon"><i class="bi bi-bank"></i></div>
+            <div class="payment-method-name">Transfer</div>
+          </button>
+          <button class="payment-method-btn" data-method="QRIS" onclick="selectPaymentMethod(this)">
+            <div class="payment-method-icon"><i class="bi bi-qr-code"></i></div>
+            <div class="payment-method-name">QRIS</div>
+          </button>
+        </div>
+
+        <!-- Total Display -->
+        <div class="payment-total-display">
+          <div class="payment-total-label">Total Pembayaran</div>
+          <div class="payment-total-value" id="paymentTotalDisplay">Rp 0</div>
+        </div>
+
+        <!-- Payment Amount -->
+        <div class="payment-input-group" id="cashInputGroup">
+          <label for="paymentAmount">Nominal Bayar</label>
+          <input type="number" id="paymentAmount" placeholder="0" min="0" oninput="calculateChange()">
+        </div>
+
+        <!-- Quick Amount Buttons -->
+        <div class="d-flex gap-2 flex-wrap mb-3" id="quickAmountBtns">
+          <!-- Will be populated by JS -->
+        </div>
+
+        <!-- Change -->
+        <div class="payment-change" id="paymentChange" style="display:none;">
+          <div class="payment-change-label">Kembalian</div>
+          <div class="payment-change-value" id="paymentChangeValue">Rp 0</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-success" id="confirmPayBtn" onclick="confirmPayment()">
+          <i class="bi bi-check-circle me-1"></i> Selesaikan & Cetak Struk
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scanner Modal -->
+<div class="modal fade" id="scannerModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-upc-scan me-2"></i>Scan Barcode</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="scanner-container" id="scannerContainer"></div>
+        <p class="text-muted text-center mt-2" style="font-size:0.78rem;">
+          Arahkan kamera ke barcode produk
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/pos.js"></script>

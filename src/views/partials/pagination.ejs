@@ -1,0 +1,37 @@
+<!-- Pagination Component -->
+<%
+  var currentPage = typeof page !== 'undefined' ? page : 1;
+  var totalPages = typeof pages !== 'undefined' ? pages : 1;
+  var baseUrl = typeof url !== 'undefined' ? url : '#';
+%>
+
+<% if (totalPages > 1) { %>
+<nav aria-label="Navigasi halaman">
+  <div class="pagination-wrapper">
+    <!-- Previous -->
+    <a href="<%= baseUrl %>?page=<%= Math.max(1, currentPage - 1) %>"
+       class="page-link <%= currentPage <= 1 ? 'disabled' : '' %>"
+       aria-label="Sebelumnya">
+      <i class="bi bi-chevron-left"></i>
+    </a>
+
+    <% for (var i = 1; i <= totalPages; i++) { %>
+      <% if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) { %>
+        <a href="<%= baseUrl %>?page=<%= i %>"
+           class="page-link <%= i === currentPage ? 'active' : '' %>">
+          <%= i %>
+        </a>
+      <% } else if (i === currentPage - 3 || i === currentPage + 3) { %>
+        <span class="page-link disabled">…</span>
+      <% } %>
+    <% } %>
+
+    <!-- Next -->
+    <a href="<%= baseUrl %>?page=<%= Math.min(totalPages, currentPage + 1) %>"
+       class="page-link <%= currentPage >= totalPages ? 'disabled' : '' %>"
+       aria-label="Selanjutnya">
+      <i class="bi bi-chevron-right"></i>
+    </a>
+  </div>
+</nav>
+<% } %>

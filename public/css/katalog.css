@@ -1,0 +1,404 @@
+/* ============================================================
+   SCORIP POS — Katalog Publik Stylesheet
+   ============================================================ */
+
+.katalog-navbar {
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.75rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.katalog-navbar-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.katalog-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  text-decoration: none;
+}
+
+.katalog-brand-icon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.katalog-brand-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.katalog-wa-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 1rem;
+  background: #25D366;
+  color: #fff;
+  border-radius: var(--radius-full);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.katalog-wa-btn:hover {
+  background: #1EBE57;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37,211,102,0.3);
+}
+
+/* Hero Section */
+.katalog-hero {
+  background: linear-gradient(135deg, #0F0A1F 0%, #1A1433 50%, #2D1B69 100%);
+  padding: 4rem 1.5rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.katalog-hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(79,70,229,0.15) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.katalog-hero::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  left: -10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(124,58,237,0.1) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.katalog-hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.katalog-hero-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
+}
+
+.katalog-hero-subtitle {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 1.5rem;
+}
+
+.katalog-hero-search {
+  max-width: 480px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.katalog-hero-search input {
+  width: 100%;
+  padding: 0.85rem 1.25rem 0.85rem 3rem;
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-xl);
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  font-size: 0.95rem;
+  font-family: var(--font-sans);
+  transition: all var(--transition-fast);
+}
+
+.katalog-hero-search input::placeholder {
+  color: rgba(255,255,255,0.4);
+}
+
+.katalog-hero-search input:focus {
+  outline: none;
+  border-color: var(--primary-light);
+  background: rgba(255,255,255,0.12);
+}
+
+.katalog-hero-search i {
+  position: absolute;
+  left: 1.1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255,255,255,0.4);
+  font-size: 1rem;
+}
+
+/* Product Section */
+.katalog-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+}
+
+.katalog-section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+}
+
+.katalog-categories {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.katalog-categories .pos-category-btn,
+.pos-category-btn {
+  padding: 0.45rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  background: #fff;
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.katalog-categories .pos-category-btn:hover,
+.pos-category-btn:hover {
+  border-color: var(--primary-light);
+  color: var(--primary);
+}
+
+.katalog-categories .pos-category-btn.active,
+.pos-category-btn.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  box-shadow: 0 2px 8px rgba(79,70,229,0.25);
+}
+
+.katalog-product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.25rem;
+}
+
+.katalog-product-card {
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition: all var(--transition-base);
+  position: relative;
+}
+
+.katalog-product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.katalog-product-img {
+  width: 100%;
+  aspect-ratio: 1;
+  background: var(--bg-body);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-light);
+  font-size: 3rem;
+  overflow: hidden;
+}
+
+.katalog-product-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-slow);
+}
+
+.katalog-product-card:hover .katalog-product-img img {
+  transform: scale(1.05);
+}
+
+.katalog-product-info {
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.katalog-product-category {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.375rem;
+}
+
+.katalog-product-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.katalog-product-price {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--primary);
+  font-family: var(--font-mono);
+  margin-bottom: 0.75rem;
+}
+
+.katalog-product-order-btn {
+  width: 100%;
+  padding: 0.6rem;
+  background: #25D366;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  transition: all var(--transition-fast);
+}
+
+.katalog-product-order-btn:hover {
+  background: #1EBE57;
+  transform: translateY(-1px);
+}
+
+.katalog-product-stock-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+.katalog-product-stock-badge.in-stock {
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+
+.katalog-product-stock-badge.low-stock {
+  background: var(--warning-bg);
+  color: var(--warning-text);
+}
+
+.katalog-product-stock-badge.out-of-stock {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+}
+
+/* Footer */
+.katalog-footer {
+  background: var(--bg-body);
+  border-top: 1px solid var(--border-color);
+  padding: 2rem 1.5rem;
+  text-align: center;
+}
+
+.katalog-footer-text {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+/* WhatsApp floating button */
+.wa-floating-btn {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  background: #25D366;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 15px rgba(37,211,102,0.4);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  z-index: 90;
+  text-decoration: none;
+  border: none;
+}
+
+.wa-floating-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(37,211,102,0.5);
+  color: #fff;
+}
+
+/* Responsive */
+@media (max-width: 767.98px) {
+  .katalog-hero {
+    padding: 3rem 1rem;
+  }
+
+  .katalog-hero-title {
+    font-size: 1.6rem;
+  }
+
+  .katalog-product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .katalog-product-info {
+    padding: 0.75rem;
+  }
+
+  .katalog-product-name {
+    font-size: 0.82rem;
+  }
+
+  .katalog-product-price {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .katalog-product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

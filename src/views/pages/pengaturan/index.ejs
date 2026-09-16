@@ -1,0 +1,723 @@
+<!-- Pengaturan -->
+<div class="animate-fade-in-up">
+  <div class="page-header">
+    <div class="page-header-left">
+      <h2 class="page-title">Pengaturan</h2>
+      <span class="page-subtitle">Konfigurasi aplikasi, integrasi, dan akses sistem</span>
+    </div>
+  </div>
+
+  <!-- Tabs Navigasi -->
+  <ul class="nav nav-tabs-custom mb-4" role="tablist" id="pengaturanTabs">
+    <li class="nav-item">
+      <a class="nav-link <%= (typeof activeTab !== 'undefined' && activeTab === 'hak-akses') ? 'active' : '' %>" data-bs-toggle="tab" href="#tabHakAkses">
+        <i class="bi bi-shield-check me-1 text-primary"></i> Hak Akses & Role (Tabel)
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link <%= (typeof activeTab !== 'undefined' && activeTab === 'pengguna') ? 'active' : '' %>" data-bs-toggle="tab" href="#tabPengguna">
+        <i class="bi bi-people-fill me-1"></i> Kelola Pengguna
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link <%= (typeof activeTab === 'undefined' || activeTab === 'umum') ? 'active' : '' %>" data-bs-toggle="tab" href="#tabUmum">
+        <i class="bi bi-sliders me-1"></i> Umum
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link <%= (typeof activeTab !== 'undefined' && activeTab === 'struk') ? 'active' : '' %>" data-bs-toggle="tab" href="#tabStruk">
+        <i class="bi bi-receipt me-1"></i> Struk Kasir
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link <%= (typeof activeTab !== 'undefined' && activeTab === 'whatsapp') ? 'active' : '' %>" data-bs-toggle="tab" href="#tabWhatsApp">
+        <i class="bi bi-whatsapp me-1"></i> WhatsApp Gateway
+      </a>
+    </li>
+  </ul>
+
+  <div class="tab-content">
+    <!-- ============================================================
+         TAB 1: UMUM
+         ============================================================ -->
+    <div class="tab-pane fade <%= (typeof activeTab === 'undefined' || activeTab === 'umum') ? 'show active' : '' %>" id="tabUmum">
+      <div class="row">
+        <div class="col-lg-10 col-xl-8 col-xxl-7">
+          <div class="card">
+            <div class="card-header"><h6 class="card-header-title">Pengaturan Umum</h6></div>
+            <div class="card-body">
+              <form action="/pengaturan/umum" method="POST" enctype="multipart/form-data">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Nama Aplikasi</label>
+                    <input type="text" class="form-control" name="nama_aplikasi" value="<%= settings.nama_aplikasi %>">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Sub Judul / Slogan</label>
+                    <input type="text" class="form-control" name="sub_judul" value="<%= settings.sub_judul %>">
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label">Logo Aplikasi</label>
+                    <input type="file" class="form-control" name="logo" accept="image/*">
+                    <div class="form-text">Upload logo baru (PNG/JPG, max 1MB)</div>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3"><i class="bi bi-check-lg me-1"></i> Simpan Pengaturan Umum</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         TAB 2: STRUK KASIR
+         ============================================================ -->
+    <div class="tab-pane fade <%= (typeof activeTab !== 'undefined' && activeTab === 'struk') ? 'show active' : '' %>" id="tabStruk">
+      <div class="row">
+        <div class="col-lg-10 col-xl-8 col-xxl-7">
+          <div class="card">
+            <div class="card-header"><h6 class="card-header-title">Pengaturan Struk Kasir</h6></div>
+            <div class="card-body">
+              <form action="/pengaturan/struk" method="POST">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Header Struk</label>
+                    <textarea class="form-control" name="header_struk" rows="4" placeholder="Nama Toko&#10;Alamat&#10;Telp"><%= settings.header_struk %></textarea>
+                    <div class="form-text">Tampil di bagian paling atas struk belanja kasir.</div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Footer Struk</label>
+                    <textarea class="form-control" name="footer_struk" rows="4" placeholder="Terima kasih!"><%= settings.footer_struk %></textarea>
+                    <div class="form-text">Tampil di bagian penutup struk belanja.</div>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3"><i class="bi bi-check-lg me-1"></i> Simpan Format Struk</button>
+              </form>
+              <hr>
+              <a href="/pos/riwayat" class="btn btn-outline-primary btn-sm"><i class="bi bi-receipt me-1"></i> Buka Riwayat Transaksi & Struk</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         TAB 3: WHATSAPP GATEWAY
+         ============================================================ -->
+    <div class="tab-pane fade <%= (typeof activeTab !== 'undefined' && activeTab === 'whatsapp') ? 'show active' : '' %>" id="tabWhatsApp">
+      <div class="row">
+        <div class="col-lg-11 col-xl-9 col-xxl-8">
+          <div class="card">
+            <div class="card-header"><h6 class="card-header-title">Konfigurasi WhatsApp Gateway</h6></div>
+            <div class="card-body">
+              <form action="/pengaturan/whatsapp" method="POST">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label">URL API Gateway</label>
+                    <input type="url" class="form-control" name="wa_api_url" value="<%= settings.wa_api_url %>" placeholder="https://api.fonnte.com/send">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">API Key</label>
+                    <div class="input-group">
+                      <input type="password" class="form-control" name="wa_api_key" id="waApiKey" value="<%= settings.wa_api_key %>" placeholder="Masukkan API Key">
+                      <button class="btn btn-outline-secondary" type="button" onclick="toggleWaKey()"><i class="bi bi-eye" id="waKeyIcon"></i></button>
+                    </div>
+                    <div class="form-text text-warning"><i class="bi bi-shield-lock me-1"></i>API Key tersimpan secara aman</div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Template Pesan POS Kasir</label>
+                    <textarea class="form-control" name="wa_template_pos" rows="6" style="font-size:0.8rem;"><%= settings.wa_template_pos %></textarea>
+                    <div class="form-text">Variabel tersedia: {nama}, {no_transaksi}, {total}, {metode_bayar}</div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Template Pesan Order Online</label>
+                    <textarea class="form-control" name="wa_template_order" rows="6" style="font-size:0.8rem;"><%= settings.wa_template_order %></textarea>
+                    <div class="form-text">Variabel tersedia: {detail_pesanan}, {nama}, {no_hp}, {alamat}</div>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3"><i class="bi bi-check-lg me-1"></i> Simpan Konfigurasi WhatsApp</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         TAB 0 / DEDICATED: HAK AKSES & ROLE (TABEL & MODUL)
+         ============================================================ -->
+    <div class="tab-pane fade <%= (typeof activeTab !== 'undefined' && activeTab === 'hak-akses') ? 'show active' : '' %>" id="tabHakAkses">
+      <!-- Info Alert Box -->
+      <div class="alert alert-primary d-flex align-items-center gap-3 mb-4 shadow-sm border-0" style="background: rgba(13, 110, 253, 0.08);">
+        <i class="bi bi-shield-lock-fill fs-2 text-primary"></i>
+        <div>
+          <h6 class="alert-heading mb-1 fw-bold text-dark">
+            Pengaturan Role & Hak Akses Tabel untuk Pengguna Selain Admin (Staff / Kasir)
+          </h6>
+          <p class="mb-0 small text-muted">
+            Gunakan <strong>toggle switch / checkbox</strong> pada tabel di bawah ini untuk menentukan tabel dan halaman mana saja yang diizinkan untuk diakses oleh akun <strong>Staff / Kasir</strong>. 
+            Contoh: Anda dapat menonaktifkan atau mengaktifkan kembali <strong>Tabel Produk</strong>.
+          </p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm border mb-4">
+        <div class="card-header bg-body py-3 px-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <div>
+            <h5 class="card-header-title mb-1" style="font-size:1.05rem;">
+              <i class="bi bi-shield-shaded me-2 text-primary"></i> Matriks Hak Akses & Wewenang Role
+            </h5>
+            <span class="text-muted small">Pilih tabel & halaman mana saja yang boleh dilihat pengguna selain Admin</span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-outline-secondary btn-sm px-3" onclick="toggleAllPerms(true)" title="Centang semua hak akses">
+              <i class="bi bi-check-all me-1"></i> Pilih Semua
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm px-3" onclick="resetDefaultPerms()" title="Kembalikan ke akses default">
+              <i class="bi bi-arrow-counterclockwise me-1"></i> Default Kasir
+            </button>
+          </div>
+        </div>
+        
+        <form action="/pengaturan/hak-akses" method="POST" id="formHakAkses">
+          <div class="card-body p-0">
+            <table class="permission-table">
+              <thead>
+                <tr>
+                  <th style="min-width:240px;">Tabel / Modul Aplikasi</th>
+                  <th class="text-center" style="width:140px;">Administrator</th>
+                  <th class="text-center" style="width:200px;">Staff (Non-Admin / Kasir)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% 
+                  const pList = typeof staffPermissions !== 'undefined' ? staffPermissions : ['pos', 'produk', 'kategori', 'stok_opname', 'pelanggan'];
+                  const modules = [
+                    { key: 'pos', name: 'POS Kasir & Penjualan', desc: 'Melayani transaksi, pembayaran & cetak struk', isProduct: false },
+                    { key: 'produk', name: 'Tabel Produk & Inventaris', desc: 'Melihat & mengelola daftar inventaris barang produk', isProduct: true },
+                    { key: 'kategori', name: 'Tabel Kategori Produk', desc: 'Melihat & mengelompokkan kategori barang', isProduct: false },
+                    { key: 'stok_opname', name: 'Tabel Stok Opname', desc: 'Melakukan penghitungan fisik & penyesuaian stok barang', isProduct: false },
+                    { key: 'po_import', name: 'Tabel PO Import & Tracking', desc: 'HPP land cost, kurs RMB/USD, dan pengadaan PO', isProduct: false },
+                    { key: 'supplier', name: 'Tabel Master Supplier', desc: 'Data kontak pemasok barang dalam & luar negeri', isProduct: false },
+                    { key: 'forwarder', name: 'Tabel Master Forwarder', desc: 'Ekspedisi pengiriman & tracking nomor resi kargo', isProduct: false },
+                    { key: 'pelanggan', name: 'Tabel Data Pelanggan', desc: 'Database pelanggan, nomor WhatsApp & riwayat pembelian', isProduct: false },
+                    { key: 'laporan', name: 'Tabel Laporan & Finansial', desc: 'Grafik transaksi, laporan penjualan & omzet', isProduct: false },
+                    { key: 'audit_log', name: 'Tabel Audit Log Sistem', desc: 'Rekam aktivitas login, hapus, & perubahan data sistem', isProduct: false },
+                  ];
+                %>
+                <% modules.forEach(function(m) { %>
+                <tr class="<%= m.isProduct ? 'table-primary-subtle' : '' %>" style="<%= m.isProduct ? 'background: rgba(13, 110, 253, 0.04);' : '' %>">
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="fw-semibold text-dark" style="font-size:0.92rem;"><%= m.name %></div>
+                      <% if (m.isProduct) { %>
+                        <span class="badge bg-primary text-white" style="font-size:0.7rem;">Pilihan Tabel Produk</span>
+                      <% } %>
+                    </div>
+                    <div class="text-muted" style="font-size:0.75rem;"><%= m.desc %></div>
+                  </td>
+                  <td class="text-center">
+                    <span class="perm-check" title="Admin memiliki akses penuh permanen">
+                      <i class="bi bi-shield-fill-check text-primary"></i> Penuh (Aktif)
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <div class="form-check form-switch d-inline-flex align-items-center gap-2 m-0">
+                      <input class="form-check-input perm-switch" type="checkbox" role="switch"
+                             id="perm_<%= m.key %>" name="permissions" value="<%= m.key %>"
+                             <%= pList.includes(m.key) ? 'checked' : '' %>
+                             style="cursor:pointer;width:2.4em;height:1.25em;">
+                      <label class="form-check-label fw-bold" for="perm_<%= m.key %>" style="font-size:0.8rem;cursor:pointer;">
+                        <span class="perm-label-text badge <%= pList.includes(m.key) ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' %>">
+                          <%= pList.includes(m.key) ? 'Diizinkan' : 'Ditolak' %>
+                        </span>
+                      </label>
+                    </div>
+                  </td>
+                </tr>
+                <% }); %>
+                <!-- Pengaturan & User (Khusus Admin) -->
+                <tr class="bg-light-subtle">
+                  <td>
+                    <div class="fw-semibold text-muted" style="font-size:0.92rem;">Pengaturan Sistem & Kelola Akun Pengguna</div>
+                    <div class="text-muted" style="font-size:0.75rem;">Identitas toko, WA gateway, dan hak akses user</div>
+                  </td>
+                  <td class="text-center">
+                    <span class="perm-check"><i class="bi bi-shield-fill-check"></i> Penuh</span>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-secondary-subtle text-secondary border px-2 py-1" style="font-size:0.72rem;" title="Hanya Admin demi keamanan sistem">
+                      <i class="bi bi-lock-fill me-1"></i> Khusus Admin Saja
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="p-3 bg-light border-top d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2 text-muted" style="font-size:0.8rem;">
+              <i class="bi bi-shield-lock-fill text-primary fs-5"></i>
+              <span>Perubahan izin akan <strong>langsung aktif seketika</strong> tanpa perlu me-restart server.</span>
+            </div>
+            <button type="submit" class="btn btn-primary px-4 py-2 fw-semibold">
+              <i class="bi bi-check-lg me-1"></i> Simpan Hak Akses Pengguna
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         TAB 4: PENGATURAN PENGGUNA & KREDENSIAL
+         ============================================================ -->
+    <div class="tab-pane fade <%= (typeof activeTab !== 'undefined' && activeTab === 'pengguna') ? 'show active' : '' %>" id="tabPengguna">
+      
+      <!-- Shortcut banner to Hak Akses -->
+      <div class="alert alert-info py-2 px-3 mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2 shadow-sm border-0">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-shield-check fs-4 text-info-emphasis"></i>
+          <span class="small text-dark">
+            Ingin mengatur tabel mana saja yang boleh dilihat user selain Admin (seperti <strong>Tabel Produk</strong>, <strong>Laporan</strong>, dll)?
+          </span>
+        </div>
+        <button type="button" class="btn btn-sm btn-primary" onclick="switchToHakAksesTab()">
+          <i class="bi bi-sliders me-1"></i> Buka Hak Akses & Role (Tabel)
+        </button>
+      </div>
+
+      <!-- User Summary & Action Bar -->
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+        <div class="d-flex align-items-center gap-3">
+          <div>
+            <h6 class="mb-0 fw-bold">Pengaturan Akun Pengguna</h6>
+            <span class="text-muted small">Kelola akun kasir & admin, status akun, dan kata sandi pengguna</span>
+          </div>
+          <div class="d-flex gap-2">
+            <span class="badge bg-light text-dark border">
+              Total: <strong><%= typeof users !== 'undefined' ? users.length : 0 %></strong> User
+            </span>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+              Admin: <strong><%= typeof users !== 'undefined' ? users.filter(u => u.role === 'Admin').length : 0 %></strong>
+            </span>
+            <span class="badge bg-secondary-subtle text-secondary border">
+              Staff Kasir: <strong><%= typeof users !== 'undefined' ? users.filter(u => u.role === 'Staff').length : 0 %></strong>
+            </span>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#userModal" onclick="resetUserForm()">
+          <i class="bi bi-person-plus-fill me-1"></i> Tambah Akun Pengguna
+        </button>
+      </div>
+
+      <!-- Tabel Daftar Pengguna -->
+      <div class="card mb-4 shadow-sm border">
+        <div class="card-header bg-body d-flex align-items-center justify-content-between py-2 px-3">
+          <h6 class="card-header-title mb-0" style="font-size:0.9rem;">
+            <i class="bi bi-people me-1 text-primary"></i> Daftar Akun Pengguna Sistem
+          </h6>
+          <span class="text-muted" style="font-size:0.76rem;">Hak akses diterapkan otomatis berdasarkan peran (Role)</span>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table mb-0">
+            <thead>
+              <tr>
+                <th style="min-width: 220px;">Pengguna</th>
+                <th style="width: 140px;">Role Akses</th>
+                <th class="text-center" style="width: 110px;">Status Akun</th>
+                <th style="width: 170px;">Terakhir Login</th>
+                <th class="text-end" style="width: 140px;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% (typeof users !== 'undefined' ? users : []).forEach(function(u) { %>
+              <tr id="row-user-<%= u.id %>">
+                <!-- User (Avatar + Nama + Username) -->
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="avatar-sm <%= u.role === 'Admin' ? 'admin' : 'staff' %>">
+                      <%= (u.nama || u.username).charAt(0).toUpperCase() %>
+                    </div>
+                    <div class="min-w-0">
+                      <div class="fw-semibold text-dark" style="font-size:0.86rem;"><%= u.nama %></div>
+                      <div class="d-flex align-items-center gap-1">
+                        <span class="text-muted" style="font-size:0.74rem;font-family:var(--font-mono);">@<%= u.username %></span>
+                        <% if (typeof currentUser !== 'undefined' && currentUser && currentUser.id === u.id) { %>
+                          <span class="badge bg-info-subtle text-info-emphasis border" style="font-size:0.65rem;">Akun Saya</span>
+                        <% } %>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Role -->
+                <td>
+                  <span class="role-pill <%= u.role === 'Admin' ? 'admin' : 'staff' %>">
+                    <i class="bi <%= u.role === 'Admin' ? 'bi-shield-check' : 'bi-person' %>"></i>
+                    <%= u.role %>
+                  </span>
+                </td>
+
+                <!-- Status -->
+                <td class="text-center">
+                  <span class="badge-status <%= u.status %>">
+                    <%= u.status.charAt(0).toUpperCase() + u.status.slice(1) %>
+                  </span>
+                </td>
+
+                <!-- Last Login -->
+                <td class="text-nowrap" style="font-size:0.78rem;color:var(--text-muted);">
+                  <% if (u.last_login) { %>
+                    <i class="bi bi-clock-history me-1 opacity-50"></i><%= new Date(u.last_login).toLocaleDateString('id-ID', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) %>
+                  <% } else { %>
+                    <span class="text-muted opacity-50">— Belum ada</span>
+                  <% } %>
+                </td>
+
+                <!-- Aksi -->
+                <td class="text-end text-nowrap">
+                  <div class="d-flex justify-content-end gap-1">
+                    <!-- Edit Detail -->
+                    <button type="button" class="btn btn-ghost btn-icon btn-sm" title="Edit Profil Akun"
+                            data-bs-toggle="modal" data-bs-target="#userModal"
+                            onclick='editUser(<%- JSON.stringify(u).replace(/'/g, "&#39;") %>)'>
+                      <i class="bi bi-pencil"></i>
+                    </button>
+
+                    <!-- Reset Password Admin -->
+                    <button type="button" class="btn btn-ghost btn-icon btn-sm text-warning" title="Reset Kata Sandi User"
+                            data-bs-toggle="modal" data-bs-target="#resetPasswordModal"
+                            onclick="openResetPasswordModal(<%= u.id %>, '<%= u.username %>', '<%= u.nama.replace(/'/g, "\\'") %>')">
+                      <i class="bi bi-key"></i>
+                    </button>
+
+                    <!-- Hapus User -->
+                    <% if (u.id === 1) { %>
+                      <button type="button" class="btn btn-ghost btn-icon btn-sm text-muted opacity-25" title="Administrator Utama tidak dapat dihapus" disabled>
+                        <i class="bi bi-shield-lock"></i>
+                      </button>
+                    <% } else if (typeof currentUser !== 'undefined' && currentUser && currentUser.id === u.id) { %>
+                      <button type="button" class="btn btn-ghost btn-icon btn-sm text-muted opacity-25" title="Anda tidak dapat menghapus akun Anda sendiri" disabled>
+                        <i class="bi bi-person-x"></i>
+                      </button>
+                    <% } else { %>
+                      <button type="button" class="btn btn-ghost btn-icon btn-sm text-danger" title="Hapus Akun Pengguna"
+                              data-bs-toggle="modal" data-bs-target="#deleteModal"
+                              data-name="Akun <%= u.username %> (<%= u.nama %>)"
+                              data-url="/pengaturan/users/<%= u.id %>/delete">
+                        <i class="bi bi-trash3"></i>
+                      </button>
+                    <% } %>
+                  </div>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Ganti Kata Sandi Sendiri -->
+      <div class="row">
+        <div class="col-lg-6 col-xl-5">
+          <div class="card h-100 shadow-sm border">
+            <div class="card-header bg-body py-2 px-3">
+              <h6 class="card-header-title mb-0" style="font-size:0.9rem;">
+                <i class="bi bi-key-fill me-1 text-warning"></i> Ganti Kata Sandi Akun Saya
+              </h6>
+            </div>
+            <div class="card-body">
+              <p class="text-muted" style="font-size:0.8rem;line-height:1.4;">
+                Perbarui kata sandi untuk akun administrator Anda saat ini (<strong><%= (typeof currentUser !== 'undefined' && currentUser && currentUser.nama) ? currentUser.nama : 'Admin' %></strong>).
+              </p>
+
+              <form action="/pengaturan/ganti-password" method="POST">
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Kata Sandi Saat Ini <span class="text-danger">*</span></label>
+                  <div class="input-group input-group-sm">
+                    <input type="password" class="form-control" name="password_lama" id="selfOldPass" placeholder="Masukkan kata sandi lama" required>
+                    <button class="btn btn-outline-secondary" type="button" onclick="toggleInputPassword('selfOldPass', 'iconOldPass')">
+                      <i class="bi bi-eye" id="iconOldPass"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Kata Sandi Baru <span class="text-danger">*</span></label>
+                  <div class="input-group input-group-sm">
+                    <input type="password" class="form-control" name="password_baru" id="selfNewPass" placeholder="Minimal 6 karakter" minlength="6" required>
+                    <button class="btn btn-outline-secondary" type="button" onclick="toggleInputPassword('selfNewPass', 'iconNewPass')">
+                      <i class="bi bi-eye" id="iconNewPass"></i>
+                    </button>
+                  </div>
+                  <div class="form-text" style="font-size:0.72rem;">Gunakan kombinasi huruf & angka untuk keamanan optimal.</div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold">Konfirmasi Kata Sandi Baru <span class="text-danger">*</span></label>
+                  <div class="input-group input-group-sm">
+                    <input type="password" class="form-control" name="konfirmasi_password" id="selfConfirmPass" placeholder="Ketik ulang kata sandi baru" minlength="6" required>
+                    <button class="btn btn-outline-secondary" type="button" onclick="toggleInputPassword('selfConfirmPass', 'iconConfirmPass')">
+                      <i class="bi bi-eye" id="iconConfirmPass"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-warning btn-sm w-100 mt-2">
+                  <i class="bi bi-shield-lock-fill me-1"></i> Perbarui Kata Sandi Akun Saya
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL 1: TAMBAH / EDIT PENGGUNA
+     ============================================================ -->
+<div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title fw-bold" id="userModalTitle">Tambah Akun Pengguna</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="/pengaturan/users" method="POST" id="userForm">
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Username <span class="text-danger">*</span></label>
+              <input type="text" class="form-control form-control-sm" name="username" id="uUsername" placeholder="cth: kasir_pagi" required>
+              <div class="form-text" style="font-size:0.7rem;">Huruf kecil/angka tanpa spasi.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Nama Lengkap <span class="text-danger">*</span></label>
+              <input type="text" class="form-control form-control-sm" name="nama" id="uNama" placeholder="Nama karyawan" required>
+            </div>
+            <div class="col-12" id="uPasswordGroup">
+              <label class="form-label small fw-semibold">Kata Sandi Awal <span class="text-danger">*</span></label>
+              <div class="input-group input-group-sm">
+                <input type="password" class="form-control" name="password" id="uPassword" minlength="6" placeholder="Minimal 6 karakter">
+                <button class="btn btn-outline-secondary" type="button" onclick="toggleInputPassword('uPassword', 'iconUPass')">
+                  <i class="bi bi-eye" id="iconUPass"></i>
+                </button>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Role Hak Akses</label>
+              <select class="form-select form-select-sm" name="role" id="uRole">
+                <option value="Staff">Staff (Kasir POS)</option>
+                <option value="Admin">Administrator (Akses Penuh)</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Status Akun</label>
+              <select class="form-select form-select-sm" name="status" id="uStatus">
+                <option value="aktif">Aktif</option>
+                <option value="nonaktif">Nonaktif</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer py-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-check-lg me-1"></i> Simpan Akun</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL 2: RESET KATA SANDI PENGGUNA (OLEH ADMIN)
+     ============================================================ -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h6 class="modal-title fw-bold">Reset Kata Sandi</h6>
+          <span class="text-muted" style="font-size:0.75rem;" id="resetUserSubtitle">Pengguna: -</span>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="" method="POST" id="resetPasswordForm">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Kata Sandi Baru <span class="text-danger">*</span></label>
+            <div class="input-group input-group-sm">
+              <input type="text" class="form-control fw-bold font-monospace" name="new_password" id="resetNewPassInput" minlength="6" placeholder="Min. 6 karakter" required>
+              <button class="btn btn-outline-secondary" type="button" onclick="generateRandomPassword()" title="Buat password acak">
+                <i class="bi bi-shuffle"></i> Acak
+              </button>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-1">
+              <span class="text-muted" style="font-size:0.7rem;">Gunakan tombol "Acak" untuk auto-generate.</span>
+              <button type="button" class="btn btn-link p-0 text-decoration-none" style="font-size:0.72rem;" onclick="copyGeneratedPassword()">
+                <i class="bi bi-clipboard me-1"></i> Salin
+              </button>
+            </div>
+          </div>
+          <div class="alert alert-warning py-2 px-3 mb-0" style="font-size:0.75rem;">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i> Setelah disimpan, pengguna harus login menggunakan kata sandi baru ini.
+          </div>
+        </div>
+        <div class="modal-footer py-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-warning btn-sm fw-semibold">
+            <i class="bi bi-key-fill me-1"></i> Terapkan Kata Sandi Baru
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+// Toggle WA API Key
+function toggleWaKey() {
+  const inp = document.getElementById('waApiKey');
+  const icon = document.getElementById('waKeyIcon');
+  if (inp.type === 'password') { inp.type = 'text'; icon.className = 'bi bi-eye-slash'; }
+  else { inp.type = 'password'; icon.className = 'bi bi-eye'; }
+}
+
+// Toggle generic password field
+function toggleInputPassword(inputId, iconId) {
+  const inp = document.getElementById(inputId);
+  const icon = document.getElementById(iconId);
+  if (!inp) return;
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    if (icon) icon.className = 'bi bi-eye-slash';
+  } else {
+    inp.type = 'password';
+    if (icon) icon.className = 'bi bi-eye';
+  }
+}
+
+// Modal Form User Reset
+function resetUserForm() {
+  document.getElementById('userModalTitle').textContent = 'Tambah Akun Pengguna';
+  document.getElementById('userForm').action = '/pengaturan/users';
+  document.getElementById('uPasswordGroup').style.display = '';
+  document.getElementById('uPassword').required = true;
+  document.getElementById('uUsername').readOnly = false;
+  ['uUsername', 'uNama', 'uPassword'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('uRole').value = 'Staff';
+  document.getElementById('uStatus').value = 'aktif';
+}
+
+// Modal Form User Edit
+function editUser(u) {
+  document.getElementById('userModalTitle').textContent = 'Edit Akun: ' + u.username;
+  document.getElementById('userForm').action = '/pengaturan/users/' + u.id;
+  document.getElementById('uPasswordGroup').style.display = 'none';
+  document.getElementById('uPassword').required = false;
+  document.getElementById('uUsername').value = u.username;
+  document.getElementById('uNama').value = u.nama;
+  document.getElementById('uRole').value = u.role;
+  document.getElementById('uStatus').value = u.status;
+
+  // Proteksi akun ID 1 tidak bisa diubah role/statusnya
+  const isSuperAdmin = parseInt(u.id) === 1;
+  document.getElementById('uRole').disabled = isSuperAdmin;
+  document.getElementById('uStatus').disabled = isSuperAdmin;
+}
+
+// Open Reset Password Modal
+function openResetPasswordModal(id, username, nama) {
+  document.getElementById('resetPasswordForm').action = '/pengaturan/users/' + id + '/reset-password';
+  document.getElementById('resetUserSubtitle').textContent = 'Pengguna: ' + nama + ' (@' + username + ')';
+  document.getElementById('resetNewPassInput').value = '';
+  generateRandomPassword();
+}
+
+// Generate random password
+function generateRandomPassword() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$';
+  let pass = '';
+  for (let i = 0; i < 8; i++) {
+    pass += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  const input = document.getElementById('resetNewPassInput');
+  if (input) input.value = pass;
+}
+
+// Copy generated password
+function copyGeneratedPassword() {
+  const input = document.getElementById('resetNewPassInput');
+  if (!input || !input.value) return;
+  navigator.clipboard.writeText(input.value).then(() => {
+    alert('Kata sandi "' + input.value + '" berhasil disalin ke clipboard!');
+  }).catch(() => {
+    input.select();
+    document.execCommand('copy');
+    alert('Kata sandi disalin!');
+  });
+}
+
+// Dynamic Permission Switch Helpers
+function toggleAllPerms(val) {
+  document.querySelectorAll('.perm-switch').forEach(sw => {
+    sw.checked = val;
+    const label = sw.parentElement.querySelector('.perm-label-text');
+    if (label) label.textContent = val ? 'Diizinkan' : 'Ditolak';
+  });
+}
+
+function resetDefaultPerms() {
+  const defaults = ['pos', 'produk', 'kategori', 'stok_opname', 'pelanggan'];
+  document.querySelectorAll('.perm-switch').forEach(sw => {
+    sw.checked = defaults.includes(sw.value);
+    const label = sw.parentElement.querySelector('.perm-label-text');
+    if (label) label.textContent = sw.checked ? 'Diizinkan' : 'Ditolak';
+  });
+}
+
+document.addEventListener('change', function(e) {
+  if (e.target && e.target.classList.contains('perm-switch')) {
+    const label = e.target.parentElement.querySelector('.perm-label-text');
+    if (label) label.textContent = e.target.checked ? 'Diizinkan' : 'Ditolak';
+  }
+});
+
+function switchToHakAksesTab() {
+  const tabBtn = document.querySelector('a[href="#tabHakAkses"]');
+  if (tabBtn && window.bootstrap && window.bootstrap.Tab) {
+    new bootstrap.Tab(tabBtn).show();
+  }
+}
+
+// Auto activate tab if URL has ?tab= or hash
+document.addEventListener('DOMContentLoaded', function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const tab = urlParams.get('tab') || window.location.hash.replace('#tab', '').toLowerCase();
+  if (tab) {
+    let targetSelector = '';
+    if (tab === 'hak-akses' || tab === 'hakakses' || tab === 'akses') {
+      targetSelector = 'a[href="#tabHakAkses"]';
+    } else if (tab === 'pengguna' || tab === 'user' || tab === 'users') {
+      targetSelector = 'a[href="#tabPengguna"]';
+    } else if (tab === 'struk') {
+      targetSelector = 'a[href="#tabStruk"]';
+    } else if (tab === 'whatsapp' || tab === 'wa') {
+      targetSelector = 'a[href="#tabWhatsApp"]';
+    } else if (tab === 'umum') {
+      targetSelector = 'a[href="#tabUmum"]';
+    }
+
+    if (targetSelector) {
+      const tabTrigger = document.querySelector(targetSelector);
+      if (tabTrigger && window.bootstrap && window.bootstrap.Tab) {
+        new bootstrap.Tab(tabTrigger).show();
+      }
+    }
+  }
+});
+</script>

@@ -1,0 +1,79 @@
+<!-- Struk / Receipt Print Page -->
+<div class="struk-container">
+  <div class="struk-header">
+    <div class="struk-store-name"><%= settings.header_struk ? settings.header_struk.split('\n')[0] : settings.nama_aplikasi %></div>
+    <div class="struk-store-info"><%= settings.header_struk ? settings.header_struk.split('\n').slice(1).join('\n') : '' %></div>
+  </div>
+
+  <hr class="struk-divider">
+
+  <div class="struk-info">
+    <div class="struk-info-row">
+      <span>No</span>
+      <span><%= transaksi.no_transaksi %></span>
+    </div>
+    <div class="struk-info-row">
+      <span>Tgl</span>
+      <span><%= new Date(transaksi.tanggal).toLocaleDateString('id-ID', { day:'2-digit', month:'2-digit', year:'numeric' }) %> <%= new Date(transaksi.tanggal).toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' }) %></span>
+    </div>
+    <div class="struk-info-row">
+      <span>Kasir</span>
+      <span><%= transaksi.kasir %></span>
+    </div>
+    <div class="struk-info-row">
+      <span>Pelanggan</span>
+      <span><%= transaksi.pelanggan %></span>
+    </div>
+  </div>
+
+  <hr class="struk-divider">
+
+  <div class="struk-items">
+    <% detail.forEach(function(item) { %>
+    <div class="struk-item">
+      <div class="struk-item-name"><%= item.nama_produk %></div>
+      <div class="struk-item-detail">
+        <span><%= item.qty %> x Rp <%= item.harga.toLocaleString('id-ID') %></span>
+        <span>Rp <%= item.subtotal.toLocaleString('id-ID') %></span>
+      </div>
+      <% if (item.diskon > 0) { %>
+      <div class="struk-item-detail" style="color:#666;">
+        <span>&nbsp;&nbsp;Disc</span>
+        <span>- Rp <%= item.diskon.toLocaleString('id-ID') %></span>
+      </div>
+      <% } %>
+    </div>
+    <% }); %>
+  </div>
+
+  <div class="struk-total-section">
+    <div class="struk-total-row">
+      <span>Subtotal</span>
+      <span>Rp <%= transaksi.subtotal.toLocaleString('id-ID') %></span>
+    </div>
+    <% if (transaksi.diskon > 0) { %>
+    <div class="struk-total-row">
+      <span>Diskon</span>
+      <span>- Rp <%= transaksi.diskon.toLocaleString('id-ID') %></span>
+    </div>
+    <% } %>
+    <div class="struk-total-row grand-total">
+      <span>TOTAL</span>
+      <span>Rp <%= transaksi.total.toLocaleString('id-ID') %></span>
+    </div>
+    <div class="struk-total-row">
+      <span><%= transaksi.metode_bayar %></span>
+      <span>Rp <%= transaksi.bayar.toLocaleString('id-ID') %></span>
+    </div>
+    <% if (transaksi.kembalian > 0) { %>
+    <div class="struk-total-row">
+      <span>Kembali</span>
+      <span>Rp <%= transaksi.kembalian.toLocaleString('id-ID') %></span>
+    </div>
+    <% } %>
+  </div>
+
+  <div class="struk-footer">
+    <%= settings.footer_struk || 'Terima kasih atas kunjungan Anda!' %>
+  </div>
+</div>

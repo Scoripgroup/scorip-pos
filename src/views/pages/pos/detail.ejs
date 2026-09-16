@@ -1,0 +1,156 @@
+<!-- POS Detail Transaksi -->
+<div class="animate-fade-in-up">
+  <div class="page-header">
+    <div class="page-header-left">
+      <h2 class="page-title">Detail Transaksi</h2>
+      <span class="page-subtitle"><%= transaksi.no_transaksi %></span>
+    </div>
+    <div class="page-header-actions">
+      <a href="/pos/transaksi/<%= transaksi.id %>/struk" class="btn btn-outline-primary" target="_blank">
+        <i class="bi bi-printer"></i> Cetak Struk
+      </a>
+      <a href="/pos/riwayat" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Kembali
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Info Transaksi -->
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header">
+          <h6 class="card-header-title">Informasi Transaksi</h6>
+          <span class="badge-status <%= transaksi.status %>"><%= transaksi.status.charAt(0).toUpperCase() + transaksi.status.slice(1) %></span>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="text-muted" style="font-size:0.72rem;display:block;">No. Transaksi</label>
+            <span style="font-weight:600;font-size:0.88rem;"><%= transaksi.no_transaksi %></span>
+          </div>
+          <div class="mb-3">
+            <label class="text-muted" style="font-size:0.72rem;display:block;">Tanggal</label>
+            <span style="font-size:0.85rem;"><%= new Date(transaksi.tanggal).toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' }) %></span>
+          </div>
+          <div class="mb-3">
+            <label class="text-muted" style="font-size:0.72rem;display:block;">Kasir</label>
+            <span style="font-size:0.85rem;"><%= transaksi.kasir %></span>
+          </div>
+          <div class="mb-3">
+            <label class="text-muted" style="font-size:0.72rem;display:block;">Pelanggan</label>
+            <span style="font-size:0.85rem;"><%= transaksi.pelanggan %></span>
+          </div>
+          <div class="mb-3">
+            <label class="text-muted" style="font-size:0.72rem;display:block;">Metode Pembayaran</label>
+            <span style="font-size:0.85rem;">
+              <% if (transaksi.metode_bayar === 'Cash') { %>
+                <i class="bi bi-cash-stack text-success me-1"></i>
+              <% } else if (transaksi.metode_bayar === 'Transfer') { %>
+                <i class="bi bi-bank text-info me-1"></i>
+              <% } else { %>
+                <i class="bi bi-qr-code text-primary me-1"></i>
+              <% } %>
+              <%= transaksi.metode_bayar %>
+            </span>
+          </div>
+          <% if (transaksi.resi) { %>
+          <div class="mb-0">
+            <label class="text-muted" style="font-size:0.72rem;display:block;">No. Resi</label>
+            <span style="font-size:0.85rem;font-family:var(--font-mono);"><%= transaksi.resi %></span>
+          </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="card mt-3">
+        <div class="card-body d-flex flex-column gap-2">
+          <button class="btn btn-outline-primary btn-sm w-100" onclick="alert('Fitur kirim WA akan tersedia setelah backend terintegrasi')">
+            <i class="bi bi-whatsapp me-1"></i> Kirim via WhatsApp
+          </button>
+          <button class="btn btn-outline-secondary btn-sm w-100" data-bs-toggle="modal" data-bs-target="#resiModal">
+            <i class="bi bi-truck me-1"></i> Input Resi
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail Items -->
+    <div class="col-lg-8">
+      <div class="table-wrapper">
+        <div class="table-header">
+          <h6 class="table-header-title">Detail Item</h6>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Produk</th>
+              <th class="text-center">Qty</th>
+              <th class="text-end">Harga</th>
+              <th class="text-end">Diskon</th>
+              <th class="text-end">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% detail.forEach(function(item) { %>
+            <tr>
+              <td style="font-weight:550;"><%= item.nama_produk %></td>
+              <td class="text-center"><%= item.qty %></td>
+              <td class="text-end text-money">Rp <%= item.harga.toLocaleString('id-ID') %></td>
+              <td class="text-end text-money text-danger"><%= item.diskon > 0 ? '- Rp ' + item.diskon.toLocaleString('id-ID') : '-' %></td>
+              <td class="text-end text-money" style="font-weight:650;">Rp <%= item.subtotal.toLocaleString('id-ID') %></td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+
+        <!-- Total Section -->
+        <div style="padding:1rem 1.25rem;background:var(--bg-body);border-top:1px solid var(--border-light);">
+          <div class="d-flex justify-content-between mb-1" style="font-size:0.85rem;">
+            <span class="text-muted">Subtotal</span>
+            <span class="text-money">Rp <%= transaksi.subtotal.toLocaleString('id-ID') %></span>
+          </div>
+          <% if (transaksi.diskon > 0) { %>
+          <div class="d-flex justify-content-between mb-1" style="font-size:0.85rem;">
+            <span class="text-muted">Diskon</span>
+            <span class="text-money text-danger">- Rp <%= transaksi.diskon.toLocaleString('id-ID') %></span>
+          </div>
+          <% } %>
+          <hr style="margin:0.5rem 0;border-color:var(--border-color);">
+          <div class="d-flex justify-content-between" style="font-size:1.1rem;font-weight:700;">
+            <span>Total</span>
+            <span class="text-money" style="color:var(--primary);">Rp <%= transaksi.total.toLocaleString('id-ID') %></span>
+          </div>
+          <div class="d-flex justify-content-between mt-1" style="font-size:0.85rem;">
+            <span class="text-muted">Bayar</span>
+            <span class="text-money">Rp <%= transaksi.bayar.toLocaleString('id-ID') %></span>
+          </div>
+          <div class="d-flex justify-content-between" style="font-size:0.85rem;">
+            <span class="text-muted">Kembalian</span>
+            <span class="text-money text-success">Rp <%= transaksi.kembalian.toLocaleString('id-ID') %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Resi Modal -->
+<div class="modal fade" id="resiModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Input No. Resi</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label">Nomor Resi Pengiriman</label>
+        <input type="text" class="form-control" placeholder="Contoh: JNE-123456789" value="<%= transaksi.resi || '' %>">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-primary btn-sm" onclick="alert('Simpan resi — backend belum tersedia'); bootstrap.Modal.getInstance(document.getElementById('resiModal')).hide();">Simpan</button>
+      </div>
+    </div>
+  </div>
+</div>

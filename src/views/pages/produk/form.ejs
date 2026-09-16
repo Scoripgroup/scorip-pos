@@ -1,0 +1,159 @@
+<!-- Form Tambah/Edit Produk -->
+<div class="animate-fade-in-up">
+  <div class="page-header">
+    <div class="page-header-left">
+      <h2 class="page-title"><%= isEdit ? 'Edit Produk' : 'Tambah Produk' %></h2>
+      <span class="page-subtitle"><%= isEdit ? produk.nama : 'Isi informasi produk baru' %></span>
+    </div>
+    <div class="page-header-actions">
+      <a href="/produk" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
+    </div>
+  </div>
+
+  <form action="<%= isEdit ? '/produk/' + produk.id : '/produk' %>" method="POST" enctype="multipart/form-data">
+    <% if (isEdit) { %><input type="hidden" name="_method" value="PUT"><% } %>
+
+    <div class="row g-3">
+      <div class="col-lg-8 col-xl-8">
+        <div class="card h-100">
+          <div class="card-header"><h6 class="card-header-title">Informasi Produk</h6></div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">SKU</label>
+                <input type="text" class="form-control" name="sku" value="<%= isEdit ? produk.sku : '' %>" placeholder="Otomatis jika kosong">
+              </div>
+              <div class="col-md-8">
+                <label class="form-label">Nama Produk <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" name="nama" value="<%= isEdit ? produk.nama : '' %>" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Kategori <span class="text-danger">*</span></label>
+                <select class="form-select" name="kategori_id" required>
+                  <option value="">Pilih Kategori</option>
+                  <% kategori.forEach(function(k) { %>
+                    <option value="<%= k.id %>" <%= isEdit && produk.kategori_id === k.id ? 'selected' : '' %>><%= k.nama %></option>
+                  <% }); %>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Satuan</label>
+                <input type="text" class="form-control" name="satuan" value="<%= isEdit ? produk.satuan : 'pcs' %>" placeholder="pcs, kg, dll">
+              </div>
+              <% if (typeof canSeeCost !== 'undefined' && canSeeCost) { %>
+              <div class="col-md-6">
+                <label class="form-label">Harga Beli / Modal <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text" style="font-size:0.82rem;background:var(--bg-body);border-color:var(--border-color);">Rp</span>
+                  <input type="number" class="form-control" name="harga_beli" value="<%= isEdit ? produk.harga_beli : '' %>" min="0" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Harga Jual <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text" style="font-size:0.82rem;background:var(--bg-body);border-color:var(--border-color);">Rp</span>
+                  <input type="number" class="form-control" name="harga_jual" value="<%= isEdit ? produk.harga_jual : '' %>" min="0" required>
+                </div>
+              </div>
+              <% } else { %>
+              <div class="col-md-12">
+                <label class="form-label">Harga Jual <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text" style="font-size:0.82rem;background:var(--bg-body);border-color:var(--border-color);">Rp</span>
+                  <input type="number" class="form-control" name="harga_jual" value="<%= isEdit ? produk.harga_jual : '' %>" min="0" required>
+                </div>
+              </div>
+              <% } %>
+              <div class="col-md-4">
+                <label class="form-label">Stok</label>
+                <input type="number" class="form-control" name="stok" value="<%= isEdit ? produk.stok : 0 %>" min="0">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Stok Minimum</label>
+                <input type="number" class="form-control" name="stok_minimum" value="<%= isEdit ? produk.stok_minimum : 0 %>" min="0">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Status</label>
+                <select class="form-select" name="status">
+                  <option value="aktif" <%= isEdit && produk.status === 'aktif' ? 'selected' : '' %>>Aktif</option>
+                  <option value="nonaktif" <%= isEdit && produk.status === 'nonaktif' ? 'selected' : '' %>>Nonaktif</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+              <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> Simpan</button>
+              <a href="/produk" class="btn btn-outline-secondary">Batal</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Foto Produk & Margin -->
+      <div class="col-lg-4 col-xl-4">
+        <div class="card">
+          <div class="card-header"><h6 class="card-header-title">Foto Produk</h6></div>
+          <div class="card-body text-center">
+            <div style="width:100%;max-width:260px;margin:0 auto 1rem;aspect-ratio:1;border:2px dashed var(--border-color);border-radius:var(--radius-lg);display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg-body);overflow:hidden;cursor:pointer;" onclick="document.getElementById('fotoInput').click()">
+              <img id="fotoPreview" src="<%= isEdit && produk.foto ? produk.foto : '' %>"
+                   style="width:100%;height:100%;object-fit:cover;display:<%= isEdit && produk.foto ? 'block' : 'none' %>;">
+              <div id="fotoPlaceholder" style="display:<%= isEdit && produk.foto ? 'none' : 'flex' %>;flex-direction:column;align-items:center;gap:0.5rem;color:var(--text-light);">
+                <i class="bi bi-cloud-arrow-up" style="font-size:2rem;"></i>
+                <span style="font-size:0.78rem;">Klik untuk upload foto</span>
+                <span style="font-size:0.68rem;color:var(--text-muted);">JPG, PNG, max 2MB</span>
+              </div>
+            </div>
+            <input type="file" id="fotoInput" name="foto" accept="image/*" style="display:none;"
+                   onchange="previewImage(this, 'fotoPreview'); document.getElementById('fotoPlaceholder').style.display='none'; document.getElementById('fotoPreview').style.display='block';">
+          </div>
+        </div>
+
+        <% if (typeof canSeeCost !== 'undefined' && canSeeCost) { %>
+        <!-- Info Margin (Hanya Admin) -->
+        <div class="card mt-3">
+          <div class="card-header"><h6 class="card-header-title">Kalkulasi Margin</h6></div>
+          <div class="card-body">
+            <div class="d-flex justify-content-between mb-2" style="font-size:0.82rem;">
+              <span class="text-muted">Margin (Rp)</span>
+              <span class="text-money" id="marginRp">-</span>
+            </div>
+            <div class="d-flex justify-content-between" style="font-size:0.82rem;">
+              <span class="text-muted">Margin (%)</span>
+              <span class="text-money text-success" id="marginPercent">-</span>
+            </div>
+          </div>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </form>
+</div>
+
+<% if (typeof canSeeCost !== 'undefined' && canSeeCost) { %>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const hargaBeli = document.querySelector('[name="harga_beli"]');
+  const hargaJual = document.querySelector('[name="harga_jual"]');
+
+  function calcMargin() {
+    if (!hargaBeli || !hargaJual) return;
+    const beli = parseInt(hargaBeli.value) || 0;
+    const jual = parseInt(hargaJual.value) || 0;
+    const margin = jual - beli;
+    const pct = beli > 0 ? ((margin / beli) * 100).toFixed(1) : 0;
+
+    const rpEl = document.getElementById('marginRp');
+    const pctEl = document.getElementById('marginPercent');
+    if (rpEl) rpEl.textContent = 'Rp ' + margin.toLocaleString('id-ID');
+    if (pctEl) {
+      pctEl.textContent = pct + '%';
+      pctEl.style.color = margin >= 0 ? 'var(--success)' : 'var(--danger)';
+    }
+  }
+
+  if (hargaBeli) hargaBeli.addEventListener('input', calcMargin);
+  if (hargaJual) hargaJual.addEventListener('input', calcMargin);
+  calcMargin();
+});
+</script>
+<% } %>

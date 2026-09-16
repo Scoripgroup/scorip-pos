@@ -1,0 +1,156 @@
+<!-- Form Buat/Edit PO Import -->
+<div class="animate-fade-in-up">
+  <div class="page-header">
+    <div class="page-header-left">
+      <h2 class="page-title"><%= isEdit ? 'Edit PO Import' : 'Buat PO Import' %></h2>
+      <span class="page-subtitle"><%= isEdit ? po.no_po : 'Isi data Purchase Order baru' %></span>
+    </div>
+    <div class="page-header-actions">
+      <a href="/po-import" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
+    </div>
+  </div>
+
+  <form action="<%= isEdit ? '/po-import/' + po.id : '/po-import' %>" method="POST" id="poForm">
+    <% if (isEdit) { %><input type="hidden" name="_method" value="PUT"><% } %>
+
+    <!-- Header PO -->
+    <div class="card mb-3">
+      <div class="card-header"><h6 class="card-header-title">Header PO</h6></div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">No. PO <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="no_po" value="<%= isEdit ? po.no_po : '' %>" placeholder="PO-2025-XXX" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Tanggal <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" name="tanggal" value="<%= isEdit ? po.tanggal : new Date().toISOString().split('T')[0] %>" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Supplier <span class="text-danger">*</span></label>
+            <select class="form-select" name="supplier_id" required>
+              <option value="">Pilih Supplier</option>
+              <% supplier.forEach(function(s) { %>
+                <option value="<%= s.id %>" <%= isEdit && po.supplier_id === s.id ? 'selected' : '' %>><%= s.nama %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Kurs RMB (Rp) <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" name="kurs_rmb" id="kursRmb" value="<%= isEdit ? po.kurs_rmb : 2250 %>" min="0" required oninput="calcPO()">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Biaya Forwarder (Rp)</label>
+            <input type="number" class="form-control" name="biaya_forwarder" id="biayaForwarder" value="<%= isEdit ? po.biaya_forwarder : 0 %>" min="0" oninput="calcPO()">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Ongkir Lokal (Rp)</label>
+            <input type="number" class="form-control" name="ongkir_lokal" id="ongkirLokal" value="<%= isEdit ? po.ongkir_lokal : 0 %>" min="0" oninput="calcPO()">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Tipe Dasar Biaya</label>
+            <select class="form-select" name="base_type" id="baseType" onchange="calcPO()">
+              <option value="kurs" <%= isEdit && po.base_type === 'kurs' ? 'selected' : '' %>>Kurs × Total RMB</option>
+              <option value="nominal_tf" <%= isEdit && po.base_type === 'nominal_tf' ? 'selected' : '' %>>Nominal TF</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail Items -->
+    <div class="card mb-3">
+      <div class="card-header">
+        <h6 class="card-header-title">Detail Item PO</h6>
+        <button type="button" class="btn btn-outline-primary btn-sm" onclick="addPORow()">
+          <i class="bi bi-plus-lg me-1"></i> Tambah Item
+        </button>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="data-table" id="poItemsTable">
+            <thead>
+              <tr>
+                <th style="min-width:200px;">Produk</th>
+                <th style="width:80px;" class="text-center">Qty</th>
+                <th style="width:120px;" class="text-end">Harga RMB</th>
+                <th style="width:80px;" class="text-center">Koli</th>
+                <th style="width:120px;" class="text-end">Total RMB</th>
+                <th style="width:50px;"></th>
+              </tr>
+            </thead>
+            <tbody id="poItemsBody">
+              <% if (isEdit && typeof poDetail !== 'undefined') { %>
+                <% poDetail.forEach(function(item) { %>
+                <tr>
+                  <td>
+                    <select class="form-select form-select-sm" name="item_produk_id[]" required>
+                      <option value="">Pilih Produk</option>
+                      <% produk.forEach(function(p) { %>
+                        <option value="<%= p.id %>" <%= p.id === item.produk_id ? 'selected' : '' %>><%= p.sku %> — <%= p.nama %></option>
+                      <% }); %>
+                    </select>
+                  </td>
+                  <td><input type="number" class="form-control form-control-sm text-center" name="item_qty[]" value="<%= item.qty %>" min="1" oninput="calcPO()" required></td>
+                  <td><input type="number" class="form-control form-control-sm text-end" name="item_harga_rmb[]" value="<%= item.harga_rmb %>" min="0" step="0.01" oninput="calcPO()" required></td>
+                  <td><input type="number" class="form-control form-control-sm text-center" name="item_koli[]" value="<%= item.jumlah_koli %>" min="0"></td>
+                  <td class="text-end text-money item-total-rmb">¥ <%= item.total_rmb %></td>
+                  <td><button type="button" class="btn btn-ghost btn-icon btn-sm" onclick="removePORow(this)"><i class="bi bi-x-lg"></i></button></td>
+                </tr>
+                <% }); %>
+              <% } else { %>
+                <tr>
+                  <td>
+                    <select class="form-select form-select-sm" name="item_produk_id[]" required>
+                      <option value="">Pilih Produk</option>
+                      <% produk.forEach(function(p) { %>
+                        <option value="<%= p.id %>"><%= p.sku %> — <%= p.nama %></option>
+                      <% }); %>
+                    </select>
+                  </td>
+                  <td><input type="number" class="form-control form-control-sm text-center" name="item_qty[]" value="1" min="1" oninput="calcPO()" required></td>
+                  <td><input type="number" class="form-control form-control-sm text-end" name="item_harga_rmb[]" value="0" min="0" step="0.01" oninput="calcPO()" required></td>
+                  <td><input type="number" class="form-control form-control-sm text-center" name="item_koli[]" value="1" min="0"></td>
+                  <td class="text-end text-money item-total-rmb">¥ 0</td>
+                  <td><button type="button" class="btn btn-ghost btn-icon btn-sm" onclick="removePORow(this)"><i class="bi bi-x-lg"></i></button></td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary Kalkulasi -->
+    <div class="card mb-3">
+      <div class="card-header"><h6 class="card-header-title"><i class="bi bi-calculator me-2"></i>Kalkulasi</h6></div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label class="text-muted" style="font-size:0.75rem;">Total RMB</label>
+            <div class="text-money" style="font-size:1.1rem;" id="totalRmb">¥ 0</div>
+          </div>
+          <div class="col-md-3">
+            <label class="text-muted" style="font-size:0.75rem;">Total Barang (IDR)</label>
+            <div class="text-money" style="font-size:1.1rem;" id="totalIdr">Rp 0</div>
+          </div>
+          <div class="col-md-3">
+            <label class="text-muted" style="font-size:0.75rem;">Biaya Tambahan</label>
+            <div class="text-money" style="font-size:1.1rem;" id="totalBiaya">Rp 0</div>
+          </div>
+          <div class="col-md-3">
+            <label class="text-muted" style="font-size:0.75rem;">Total Landed Cost</label>
+            <div class="text-money" style="font-size:1.25rem;font-weight:800;color:var(--primary);" id="totalLanded">Rp 0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> Simpan PO</button>
+      <a href="/po-import" class="btn btn-outline-secondary">Batal</a>
+    </div>
+  </form>
+</div>
+
+<script src="/js/po-import.js"></script>

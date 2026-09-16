@@ -1,0 +1,87 @@
+<!-- Manajemen Pelanggan -->
+<div class="animate-fade-in-up">
+  <div class="page-header">
+    <div class="page-header-left">
+      <h2 class="page-title">Manajemen Pelanggan</h2>
+      <span class="page-subtitle"><%= pelanggan.length %> pelanggan terdaftar</span>
+    </div>
+    <div class="page-header-actions">
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pelangganModal" onclick="resetPelangganForm()">
+        <i class="bi bi-plus-lg"></i> Tambah Pelanggan
+      </button>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <div class="table-header">
+      <div class="table-search">
+        <i class="bi bi-search"></i>
+        <input type="text" placeholder="Cari pelanggan...">
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th class="text-nowrap" style="width:60px;">#</th>
+            <th style="min-width:180px;">Nama</th>
+            <th class="text-nowrap" style="width:160px;">No. HP</th>
+            <th>Alamat</th>
+            <th class="text-center text-nowrap" style="width:160px;">Total Transaksi</th>
+            <th class="text-end text-nowrap" style="width:110px;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% pelanggan.forEach(function(p, i) { %>
+          <tr>
+            <td style="color:var(--text-muted);"><%= i + 1 %></td>
+            <td style="font-weight:550;">
+              <i class="bi bi-person-circle me-2" style="color:var(--primary);"></i><%= p.nama %>
+              <% if (p.id === 1) { %><span class="badge-status draft" style="margin-left:0.5rem;font-size:0.65rem;">Default</span><% } %>
+            </td>
+            <td class="text-nowrap" style="font-size:0.82rem;"><%= p.no_hp %></td>
+            <td style="font-size:0.82rem;color:var(--text-secondary);"><%= p.alamat %></td>
+            <td class="text-center text-nowrap"><span style="background:var(--primary-bg);color:var(--primary);padding:0.2rem 0.6rem;border-radius:var(--radius-full);font-size:0.78rem;font-weight:600;"><%= p.total_transaksi %></span></td>
+            <td class="text-end">
+              <div class="d-flex justify-content-end gap-1">
+                <button class="btn btn-ghost btn-icon btn-sm" title="Edit" data-bs-toggle="modal" data-bs-target="#pelangganModal" onclick="editPelanggan(<%= JSON.stringify(p).replace(/"/g, '&quot;') %>)"><i class="bi bi-pencil"></i></button>
+                <% if (p.id !== 1) { %>
+                <button class="btn btn-ghost btn-icon btn-sm" title="Hapus" data-bs-toggle="modal" data-bs-target="#deleteModal" data-name="<%= p.nama %>" data-url="/pelanggan/<%= p.id %>"><i class="bi bi-trash3"></i></button>
+                <% } %>
+              </div>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="pelangganModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="pelangganModalTitle">Tambah Pelanggan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="/pelanggan" method="POST" id="pelangganForm">
+        <input type="hidden" name="_method" id="pelangganMethod" value="POST">
+        <div class="modal-body">
+          <div class="mb-3"><label class="form-label">Nama <span class="text-danger">*</span></label><input type="text" class="form-control" name="nama" id="pNama" required></div>
+          <div class="mb-3"><label class="form-label">No. HP</label><input type="text" class="form-control" name="no_hp" id="pHp" placeholder="08xxxxxxxxxx"></div>
+          <div class="mb-3"><label class="form-label">Alamat</label><textarea class="form-control" name="alamat" id="pAlamat" rows="2"></textarea></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-check-lg me-1"></i> Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function resetPelangganForm(){document.getElementById('pelangganModalTitle').textContent='Tambah Pelanggan';document.getElementById('pelangganForm').action='/pelanggan';document.getElementById('pelangganMethod').value='POST';['pNama','pHp','pAlamat'].forEach(id=>document.getElementById(id).value='');}
+function editPelanggan(p){document.getElementById('pelangganModalTitle').textContent='Edit Pelanggan';document.getElementById('pelangganForm').action='/pelanggan/'+p.id;document.getElementById('pelangganMethod').value='PUT';document.getElementById('pNama').value=p.nama;document.getElementById('pHp').value=p.no_hp||'';document.getElementById('pAlamat').value=p.alamat||'';}
+</script>

@@ -1,0 +1,74 @@
+<!-- Manajemen Forwarder -->
+<div class="animate-fade-in-up">
+  <div class="page-header">
+    <div class="page-header-left">
+      <h2 class="page-title">Manajemen Forwarder</h2>
+      <span class="page-subtitle"><%= forwarder.length %> forwarder terdaftar</span>
+    </div>
+    <div class="page-header-actions">
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#fwdModal" onclick="resetFwdForm()">
+        <i class="bi bi-plus-lg"></i> Tambah Forwarder
+      </button>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th class="text-nowrap" style="width:60px;">#</th>
+            <th style="min-width:200px;">Nama Forwarder</th>
+            <th class="text-nowrap" style="width:180px;">Kontak</th>
+            <th>Alamat</th>
+            <th class="text-end text-nowrap" style="width:110px;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% forwarder.forEach(function(f, i) { %>
+          <tr>
+            <td style="color:var(--text-muted);"><%= i + 1 %></td>
+            <td style="font-weight:550;"><i class="bi bi-airplane me-2" style="color:var(--accent);"></i><%= f.nama %></td>
+            <td class="text-nowrap" style="font-size:0.82rem;"><%= f.kontak %></td>
+            <td style="font-size:0.82rem;color:var(--text-secondary);"><%= f.alamat %></td>
+            <td class="text-end">
+              <div class="d-flex justify-content-end gap-1">
+                <button class="btn btn-ghost btn-icon btn-sm" title="Edit" data-bs-toggle="modal" data-bs-target="#fwdModal" onclick="editFwd(<%= JSON.stringify(f).replace(/"/g, '&quot;') %>)"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-ghost btn-icon btn-sm" title="Hapus" data-bs-toggle="modal" data-bs-target="#deleteModal" data-name="<%= f.nama %>" data-url="/forwarder/<%= f.id %>"><i class="bi bi-trash3"></i></button>
+              </div>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="fwdModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="fwdModalTitle">Tambah Forwarder</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="/forwarder" method="POST" id="fwdForm">
+        <input type="hidden" name="_method" id="fwdMethod" value="POST">
+        <div class="modal-body">
+          <div class="mb-3"><label class="form-label">Nama <span class="text-danger">*</span></label><input type="text" class="form-control" name="nama" id="fNama" required></div>
+          <div class="mb-3"><label class="form-label">Kontak</label><input type="text" class="form-control" name="kontak" id="fKontak"></div>
+          <div class="mb-3"><label class="form-label">Alamat</label><textarea class="form-control" name="alamat" id="fAlamat" rows="2"></textarea></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-check-lg me-1"></i> Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function resetFwdForm(){document.getElementById('fwdModalTitle').textContent='Tambah Forwarder';document.getElementById('fwdForm').action='/forwarder';document.getElementById('fwdMethod').value='POST';['fNama','fKontak','fAlamat'].forEach(id=>document.getElementById(id).value='');}
+function editFwd(f){document.getElementById('fwdModalTitle').textContent='Edit Forwarder';document.getElementById('fwdForm').action='/forwarder/'+f.id;document.getElementById('fwdMethod').value='PUT';document.getElementById('fNama').value=f.nama;document.getElementById('fKontak').value=f.kontak||'';document.getElementById('fAlamat').value=f.alamat||'';}
+</script>
