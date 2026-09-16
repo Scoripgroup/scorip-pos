@@ -56,20 +56,29 @@ Sebelum menjalankan aplikasi, pastikan komputer Anda telah terinstal:
 
 ## ⚙️ Panduan Instalasi
 
-1. **Clone atau Buka Folder Proyek**
-   Buka terminal/PowerShell di direktori proyek:
+1. **Clone Repositori dari GitHub**
+   Buka terminal/PowerShell dan jalankan perintah clone:
    ```bash
-   cd "d:/GEMINI AI/KASIR POS"
+   git clone https://github.com/Scoripgroup/scorip-pos.git
+   cd scorip-pos
    ```
 
 2. **Install Dependensi**
-   Jalankan perintah berikut untuk mengunduh semua paket dependensi:
+   Jalankan perintah berikut untuk mengunduh seluruh paket dependensi:
    ```bash
    npm install
    ```
 
 3. **Konfigurasi Lingkungan (`.env`)**
-   File konfigurasi `.env` telah tersedia di root direktori. Anda dapat menyesuaikan konfigurasi jika diperlukan:
+   Salin file template `.env.example` menjadi `.env`:
+   ```bash
+   # Di Linux / macOS:
+   cp .env.example .env
+
+   # Di Windows (PowerShell):
+   copy .env.example .env
+   ```
+   Sesuaikan isinya jika diperlukan:
    ```env
    PORT=3000
    NODE_ENV=development
@@ -77,7 +86,7 @@ Sebelum menjalankan aplikasi, pastikan komputer Anda telah terinstal:
    ```
 
 4. **Inisialisasi Database**
-   Database SQLite beserta skema dan akun default akan **dibuat otomatis** saat pertama kali aplikasi dijalankan. File database disimpan di `./data/scorip-pos.sqlite`.
+   Database SQLite beserta skema tabel dan akun default akan **dibuat otomatis** saat pertama kali aplikasi dijalankan. File database disimpan di `./data/scorip-pos.sqlite`.
 
 ---
 
