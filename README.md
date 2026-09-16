@@ -81,7 +81,7 @@ Sebelum menjalankan aplikasi, pastikan komputer Anda telah terinstal:
    Sesuaikan isinya jika diperlukan:
    ```env
    PORT=3000
-   NODE_ENV=development
+   NODE_ENV=developmentA
    SESSION_SECRET=scorip-pos-secret-key-change-in-production
    ```
 
