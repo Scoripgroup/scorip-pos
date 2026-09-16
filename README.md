@@ -118,6 +118,145 @@ Sistem dilengkapi dua akun bawaan untuk pengujian role:
 
 ---
 
+## 🌐 Panduan Deployment di Ubuntu Server / VPS (Dari Nol)
+
+Ikuti langkah-langkah berikut untuk menginstal dan menjalankan aplikasi pada server VPS baru (Ubuntu 20.04 / 22.04 / 24.04 LTS):
+
+### 1. Update Sistem & Install Paket Dasar
+Login ke VPS via SSH, lalu jalankan:
+```bash
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y curl git build-essential ufw
+```
+
+### 2. Install Node.js LTS (Versi 20)
+```bash
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# Verifikasi instalasi:
+node -v   # v20.x.x
+npm -v    # 10.x.x
+```
+
+### 3. Clone Repositori (Private Repo)
+Karena repositori berstatus **Private**, gunakan Personal Access Token (PAT) GitHub saat clone:
+```bash
+git clone https://github.com/Scoripgroup/scorip-pos.git
+# Masukkan Username GitHub Anda
+# Masukkan Personal Access Token (PAT) sebagai Password
+```
+Atau jika ingin langsung dengan token:
+```bash
+git clone https://<GITHUB_TOKEN>@github.com/Scoripgroup/scorip-pos.git
+```
+
+Masuk ke folder proyek:
+```bash
+cd scorip-pos
+```
+
+### 4. Install Dependensi Proyek
+```bash
+npm install
+```
+
+### 5. Konfigurasi Environment (`.env`)
+```bash
+cp .env.example .env
+nano .env
+```
+Sesuaikan nilai di dalam `.env`:
+```env
+PORT=3000
+NODE_ENV=production
+SESSION_SECRET=buat-string-acak-rahasia-panjang-di-sini
+```
+*(Tekan `Ctrl + O` lalu `Enter` untuk simpan, dan `Ctrl + X` untuk keluar dari nano).*
+
+### 6. Jalankan Server dengan PM2 (Process Manager)
+Agar aplikasi tetap aktif di background saat SSH ditutup atau server restart:
+```bash
+# Install PM2 global
+sudo npm install -g pm2
+
+# Jalankan aplikasi
+pm2 start src/app.js --name "scorip-pos"
+
+# Aktifkan auto-start saat VPS reboot
+pm2 save
+pm2 startup
+# (Jalankan perintah yang disarankan di terminal jika diminta)
+```
+
+### 7. Buka Port Firewall (UFW)
+```bash
+sudo ufw allow OpenSSH
+sudo ufw allow 80/tcp     # HTTP (Nginx)
+sudo ufw allow 443/tcp    # HTTPS (SSL)
+sudo ufw allow 3000/tcp   # Akses langsung port app (opsional)
+sudo ufw enable
+```
+
+---
+
+### 8. (Sangat Disarankan) Konfigurasi Nginx Reverse Proxy
+Menggunakan Nginx memungkinkan Anda mengakses aplikasi via domain atau port 80/443 tanpa perlu mengetik `:3000`.
+
+1. **Install Nginx:**
+   ```bash
+   sudo apt install -y nginx
+   ```
+
+2. **Buat File Konfigurasi Nginx:**
+   ```bash
+   sudo nano /etc/nginx/sites-available/scorip-pos
+   ```
+   Tempelkan konfigurasi berikut (ganti `domain-anda.com` dengan domain Anda atau IP VPS):
+   ```nginx
+   server {
+       listen 80;
+       server_name domain-anda.com; # atau IP Server VPS jika belum punya domain
+
+       location / {
+           proxy_pass http://127.0.0.1:3000;
+           proxy_http_version 1.1;
+           proxy_set_header Upgrade $http_upgrade;
+           proxy_set_header Connection 'upgrade';
+           proxy_set_header Host $host;
+           proxy_cache_bypass $http_upgrade;
+           proxy_set_header X-Real-IP $remote_addr;
+           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+           proxy_set_header X-Forwarded-Proto $scheme;
+       }
+   }
+   ```
+
+3. **Aktifkan Konfigurasi & Restart Nginx:**
+   ```bash
+   sudo ln -s /etc/nginx/sites-available/scorip-pos /etc/nginx/sites-enabled/
+   sudo nginx -t
+   sudo systemctl restart nginx
+   ```
+
+### 9. Pasang SSL Gratis (HTTPS) dengan Certbot
+Jika Anda menggunakan domain:
+```bash
+sudo apt install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d domain-anda.com
+```
+
+### 10. Cara Update Aplikasi di Masa Mendatang
+Jika ada pembaruan kode di GitHub:
+```bash
+cd ~/scorip-pos
+git pull origin main
+npm install
+pm2 restart scorip-pos
+```
+
+---
+
 ## 📂 Struktur Direktori Utama
 
 ```
